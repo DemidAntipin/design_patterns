@@ -35,7 +35,8 @@ class Settings_manager():
         if value.strip() == "":
             return
         if os.path.exists(value):
-            self.__config_file = value.strip()
+            value=os.path.abspath(value.strip())
+            self.__config_file = value
         else:
             raise FileNotFoundError("Не найден config файл!")
 

@@ -110,7 +110,7 @@ class test_models(unittest.TestCase):
     # Данные загружаются через json настройки из другой директории
     def test_load_other_directory(self):
         # подготовка
-        file_name = './tests/data/other_settings.json'
+        file_name = 'D:/design_patterns/tests/data/other_settings.json'
         manager = Settings_manager()
         manager.config_file=file_name
 
