@@ -37,5 +37,6 @@ class abstact_reference(ABC):
         self.__name = value.strip()
 
     # Перегрузка штатного варианта сравнения
-    def __eq__(self, value: str) -> bool:
-        return self.__unique_code == value
+    def __eq__(self, value: object) -> bool:
+        validator.validate(value, abstact_reference)
+        return self.unique_code == value.unique_code

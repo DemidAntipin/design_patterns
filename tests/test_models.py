@@ -190,6 +190,25 @@ class test_models(unittest.TestCase):
         with self.assertRaises(argument_exception):
             abstract.name = "A" * 51
 
+    # Проверить создание абстрактной модели
+    # Проверка на принадлежность или наследуемость класса от abstract_reference. Сравнение истинно, если у объектов совпадают unique_code.
+    def test_comparsion_abstract_reference(self):
+        # подготовка
+        id = uuid.uuid4().hex
+        abstract = abstact_reference()
+        company = company_model()
+        storage = storage_model()
+        abstract.unique_code = id
+        company.unique_code = id
+
+        # действие
+
+        # проверки
+        with self.assertRaises(argument_exception):
+            abstract == 512
+        assert abstract == company
+        assert abstract != storage
+
     # Проверить создание основной модели
     # Глубокая копия из settings, совпадают все данные кроме unique_id.
     def test_deep_copy_from_settings_company_model(self):
