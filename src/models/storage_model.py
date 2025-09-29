@@ -1,6 +1,8 @@
 from src.core.validator import validator
 from src.core.abstract_reference import abstact_reference
 
+######################################
+# Модель склада
 class storage_model(abstact_reference):
     __name:str = ""
 

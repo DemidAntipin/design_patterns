@@ -1,10 +1,10 @@
-from src.core.validator import validator
-from src.core.abstract_reference import abstact_reference
+from src.core import validator
+from src.core import abstact_reference
+import uuid
 
 ###############################################
 # Модель организации
 class company_model(abstact_reference):
-    __name:str = ""
     __inn:int = 0
     __bic:int = 0
     __corr_account:int = 0
@@ -15,18 +15,23 @@ class company_model(abstact_reference):
     # Счет 11 симв
     # Корреспондентский счет 11 симв
     # БИК 9 симв
-    # Наименование
     # Вид собственности 5 симв
 
-    # Наименование
-    @property
-    def name(self) -> str:
-        return self.__name
-    
-    @name.setter
-    def name(self, value:str) -> str:
-        validator.validate(value, str)
-        self.__name = value.strip()
+    # Конструктор глубокого копирования
+    def __init__(self, settings: 'settings_model' = None):
+        super().__init__()
+        try:
+            from src.models.settings_model import settings_model
+            validator.validate(settings, settings_model)
+            fields = list(filter(lambda x: not x.startswith("_") , dir(settings.company)))
+            for field in fields:
+                value = getattr(settings.company, field)
+                if not callable(value):
+                    setattr(self, field, value)
+            self.unique_code = uuid.uuid4().hex
+        except:
+            return
+
 
     # ИНН
     @property
@@ -58,6 +63,7 @@ class company_model(abstact_reference):
         validator.validate(value, int, 11)
         self.__corr_account = value
 
+    # Счёт
     @property
     def account(self) -> int:
         return self.__account
@@ -67,6 +73,7 @@ class company_model(abstact_reference):
         validator.validate(value, int, 11)
         self.__account = value
 
+    # Вид собственности
     @property
     def ownership(self) -> str:
         return self.__ownership

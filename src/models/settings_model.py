@@ -1,4 +1,4 @@
-from src.models.company_model import company_model
+from src.models import company_model
 from src.core.validator import validator
 
 ######################################

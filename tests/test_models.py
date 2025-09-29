@@ -1,7 +1,11 @@
 from src.models.company_model import company_model
 from src.settings_manager import settings_manager
+from src.models.nomenclature_group_model import nomenclature_group_model
+from src.models.nomenclature_model import nomeclature_model
+from src.models.measure_model import measure_model
 from src.models.storage_model import storage_model
-from src.core.validator import argument_exception, operation_exception
+from src.core.validator import validator, argument_exception, operation_exception
+from src.core.abstract_reference import abstact_reference
 import uuid
 import unittest
 
@@ -55,13 +59,13 @@ class test_models(unittest.TestCase):
         with self.assertRaises(argument_exception):
             model.name = "  "
         with self.assertRaises(argument_exception):
-            model.inn = 123
+            model.inn = 1234567890123456789
         with self.assertRaises(argument_exception):
-            model.account = 123
+            model.account = 1234567890123456789
         with self.assertRaises(argument_exception):
-            model.corr_account = 123
+            model.corr_account = 1234567890123456789
         with self.assertRaises(argument_exception):
-            model.bic = 123
+            model.bic = 1234567890123456789
         with self.assertRaises(argument_exception):
             model.ownership = "OOOAAAOOO"
         
@@ -156,6 +160,80 @@ class test_models(unittest.TestCase):
         # проверки
         assert result == False
 
+    # Проверить создание абстрактной модели
+    # Поле name задается вручную, а unique_code автоматически.
+    def test_create_empty_abstract_reference(self):
+        # подготовка
+        empty_abstract = abstact_reference()
+        not_empty_abstract = abstact_reference()
+
+        # действие
+        not_empty_abstract.name = "test"
+
+        # проверки
+        assert empty_abstract.name == ""
+        assert validator.validate(empty_abstract.unique_code, str)
+        assert not_empty_abstract.name == "test"
+        assert validator.validate(not_empty_abstract.unique_code, str)
+
+    # Проверить создание абстрактной модели
+    # Некорректные данные
+    def test_invalid_data_abstract_reference(self):
+        # подготовка
+        abstract = abstact_reference()
+
+        # действие
+
+        # проверки
+        with self.assertRaises(argument_exception):
+            abstract.name = 512
+        with self.assertRaises(argument_exception):
+            abstract.name = "A" * 51
+
+    # Проверить создание основной модели
+    # Глубокая копия из settings, совпадают все данные кроме unique_id.
+    def test_deep_copy_from_settings_company_model(self):
+        # подготовка
+        manager = settings_manager()
+        manager.settings.company.name = "test"
+        manager.settings.company.inn = 123456789012
+        manager.settings.company.account = 12345678901
+        manager.settings.company.corr_account = 12345678901
+        manager.settings.company.bic = 123456789
+        manager.settings.company.ownership = "OOOOO"
+
+        # Действие
+        company = company_model(manager.settings)
+
+        # проверки
+        assert company.name == "test"
+        assert company.inn == 123456789012
+        assert company.account == 12345678901
+        assert company.corr_account == 12345678901
+        assert company.bic == 123456789
+        assert company.ownership == "OOOOO"
+        assert company != manager.settings.company
+
+    # Проверить создание основной модели
+    # Данные загружаем. Файл настроек содержит только часть полей company_model. Остальные значения остаются по-умолчанию.
+    def test_load_matching_parameters_settings_manager(self):
+        # подготовка
+        file_name = './tests/data/particular_settings.json'
+        manager = settings_manager()
+        manager.file_name=file_name
+
+        # действие
+        result = manager.load()
+
+        # проверки
+        assert result == True
+        assert manager.settings.company.name == "test"
+        assert manager.settings.company.inn == 0
+        assert manager.settings.company.account == 12345678901
+        assert manager.settings.company.corr_account == 0
+        assert manager.settings.company.bic == 0
+        assert manager.settings.company.ownership == ""
+
     # Проверить создание основной модели
     # Данные загружаем. Проверяем работу Singletone
     def test_singleton_company_model(self):
@@ -181,6 +259,97 @@ class test_models(unittest.TestCase):
 
         # Проверки
         assert storage1 == storage2
+
+    # Проверка на сравнение двух разных по значению моделей
+    def test_create_equal_storage_model(self):
+        # Подготовка
+        storage1 = storage_model()
+        storage2 = storage_model()   
+        # Действие
+
+        # Проверки
+        assert storage1 != storage2
+
+    # Проверка создания базовой единицы измерения
+    def test_create_base_measure_model(self):
+        # Подготовка
+        base_range = measure_model("грамм", 1)
+
+        # Действие
+        
+        # Проверка
+        assert base_range.name == "грамм"
+        assert base_range.coef == 1
+        assert base_range.base_unit == None
+
+    # Проверить создание не базовой единицы измерения
+    def test_create_not_base_measure_model(self):
+        # Подготовка
+        gr = measure_model("грамм", 1)
+        kg = measure_model("кг", 1000, gr)
+        ton = measure_model("тонна", 1000, kg)
+
+        # Действие
+        
+        # Проверка
+        assert kg.name == "кг"
+        assert kg.coef == 1000
+        assert kg.base_unit == gr
+        assert ton.name == "тонна"
+        assert ton.coef == 1000
+        assert ton.base_unit == kg
+
+    # Проверить создание номенклатуры
+    # Данные должны быть пустыми
+    def test_create_empty_nomenclature_model(self):
+        # Подготовка
+        nomeclature = nomeclature_model()
+
+        # Действие
+
+        # Проверки
+        assert nomeclature.full_name == ""
+        assert nomeclature.measure_unit is None
+        assert nomeclature.nomenclature_group is None
+
+    # Проверить создание номенклатуры
+    # Данные с ошибками
+    def test_invalid_data_nomenclature_model(self):
+        # Подготовка
+        nomeclature = nomeclature_model()
+
+        # Действие
+
+        # Проверки
+        with self.assertRaises(argument_exception):
+            nomeclature.full_name = dict()
+        with self.assertRaises(argument_exception):
+            nomeclature.full_name = "A" * 256
+        with self.assertRaises(argument_exception):
+            nomeclature.nomenclature_group = 512
+        with self.assertRaises(argument_exception):
+            nomeclature.measure_unit = tuple()
+        
+    # Проверить создание номенклатуры
+    # Данные должны быть не пустые
+    def test_create_not_empty_nomenclature_model(self):
+        # подготовка
+        nomeclature = nomeclature_model()
+        nomeclature.full_name = "A" * 255
+        measure = measure_model("грамм", 1)
+        nomeclature.measure_unit = measure
+        nomeclature.nomenclature_group = nomenclature_group_model()
+
+        # действие
+        
+
+        # проверки
+        assert nomeclature.full_name == "A" * 255
+        assert nomeclature.measure_unit.name == "грамм"
+        assert nomeclature.measure_unit.coef == 1
+        assert nomeclature.measure_unit.base_unit is None
+        assert isinstance(nomeclature.nomenclature_group, nomenclature_group_model)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -17,13 +17,14 @@ class operation_exception(Exception):
 class validator:
 
     @staticmethod
-    def validate( value, type_, len_= None):
+    def validate( value, type_, len_= None, allow_null = False):
         """
             Валидация аргумента по типу и длине
         Args:
             value (any): Аргумент
             type_ (object): Ожидаемый тип
             len_ (int): Максимальная длина
+            allow_null (bool): Пропустить пустой аргумент
         Raises:
             argument_exception: Некорректный тип
             argument_exception: Нулевая длина
@@ -33,7 +34,10 @@ class validator:
         """
 
         if value is None:
-            raise argument_exception("Пустой аргумент")
+            if allow_null:
+                return True
+            else:
+                raise argument_exception("Пустой аргумент")
 
         # Проверка типа
         if not isinstance(value, type_):
@@ -43,7 +47,7 @@ class validator:
         if len(str(value).strip()) == 0:
             raise argument_exception("Пустой аргумент")
 
-        if len_ is not None and len(str(value).strip()) != len_:
+        if len_ is not None and len(str(value).strip()) > len_:
             raise argument_exception("Некорректная длина аргумента")
 
         return True
