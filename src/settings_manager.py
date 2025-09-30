@@ -1,74 +1,86 @@
-from src.models.settings import Settings
+from src.models.settings_model import settings_model
+from src.core.validator import argument_exception
+from src.core.validator import operation_exception
+from src.core.validator import validator
+from src.models.company_model import company_model
 import json
 import os
 
 ####################################################3
 # Менеджер настроек. 
 # Предназначен для управления настройками и хранения параметров приложения
-class Settings_manager():
-    __config_file:str = ""
-    __settings:Settings = None
+class settings_manager():
+    # Наименование файла (полный путь)
+    __file_name:str = ""
 
+    # Настройки
+    __settings:settings_model = None
+
+    # Singletone
     def __new__(cls):
         if not hasattr(cls, 'instance'):
-            cls.instance = super(Settings_manager, cls).__new__(cls)
+            cls.instance = super(settings_manager, cls).__new__(cls)
         return cls.instance
 
     def __init__(self):
         self.default()
 
+    # Текущие настройки
     @property
-    def settings(self) -> Settings:
+    def settings(self) -> settings_model:
         return self.__settings
     
     @settings.setter
-    def settings(self, value: Settings):
-        if isinstance(value, Settings):
+    def settings(self, value: settings_model):
+        if isinstance(value, settings_model):
             self.__settings = value
     
+    # Текущий каталог
     @property
-    def config_file(self) -> str:
-        return self.__config_file
+    def file_name(self) -> str:
+        return self.__file_name
 
-    @config_file.setter
-    def config_file(self, value:str):
-        if value.strip() == "":
-            return
-        if os.path.exists(value):
-            value=os.path.abspath(value.strip())
-            self.__config_file = value
+    # Полный путь к файлу настроек
+    @file_name.setter
+    def file_name(self, value:str):
+        validator.validate(value, str)
+        file_name = os.path.abspath(value)        
+        if os.path.exists(file_name):
+            self.__file_name = file_name.strip()
         else:
-            raise FileNotFoundError("Не найден config файл!")
+            raise argument_exception(f'Не найден файл настроек {file_name}')
 
+    # Загрузить настройки из Json файла
     def load(self) -> bool:
+        if self.__file_name == "":
+            raise operation_exception("Не найден файл настроек!")
         try:
-            with open( self.__config_file.strip(), 'r') as file_instance:
-                return self.convert(json.load(file_instance))
+            with open( self.__file_name, 'r') as file_instance:
+                settings = json.load(file_instance)
+                if "company" in settings.keys():
+                    data = settings["company"]
+                    return self.convert(data)
+            return False
         except:
             return False
         
+    # Обработать полученный словарь  
     def convert(self, data: dict) -> bool:
-        if "company" in data.keys():
-            item = data["company"]
-            required_keys = ["name", "inn", "account", "correspondent_account", "bic", "ownership"]
-            missing_keys = [key for key in required_keys if key not in item]
-            if missing_keys:
-                raise KeyError(f"Отсутствуют обязательные поля: {', '.join(missing_keys)}!")
-            self.settings.company.name = item["name"]
-            self.settings.company.inn = item["inn"]
-            self.settings.company.account = item["account"]
-            self.settings.company.correspondent_account = item["correspondent_account"]
-            self.settings.company.bic = item["bic"]
-            self.settings.company.ownership = item["ownership"]
-            return True
-        else:
-            raise ValueError("Неверный формат config файла или файл поврежден!")
+        validator.validate(data, dict)
+        fields = list(filter(lambda x: not x.startswith("_") , dir(self.__settings.company))) 
+        matching_keys = list(filter(lambda key: key in fields, data.keys()))
 
+        try:
+            for key in matching_keys:
+                setattr(self.__settings.company, key, data[key])
+        except:
+            return False        
+
+        return True
+
+    # Параметры настроек по умолчанию
     def default(self):
-        self.settings = Settings()
-        self.settings.company.name = "Default_name"
-        self.settings.company.inn = "000000000000"
-        self.settings.company.account = "00000000000"
-        self.settings.company.corr_account = "00000000000"
-        self.settings.company.bik = "000000000"
-        self.settings.company.ownership = ""
+        company = company_model()
+        company.name = "Ромашка"
+        self.__settings = settings_model()
+        self.__settings.company = company

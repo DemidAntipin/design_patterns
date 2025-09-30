@@ -5,6 +5,8 @@
         "account": 12345678901,
         "corr_account": 12345678901,
         "bic": 123456789,
-        "ownership": "OOOOO"
+        "ownership": "OOOOO",
+        "extra_field": 1523652,
+        "director": "Antipin Demid"
     }
 }

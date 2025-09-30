@@ -1,10 +1,10 @@
 {
     "company": {
         "name": "test",
-        "inn": "123456789012",
-        "account": "12345678901",
-        "correspondent_account": "12345678901",
-        "bic": "123456789",
-        "ownership": "OOO"
+        "inn": 123456789012,
+        "account": 12345678901,
+        "corr_account": 12345678901,
+        "bic": 123456789,
+        "ownership": "OOOOO"
     }
 }
