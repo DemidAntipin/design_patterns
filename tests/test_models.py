@@ -6,6 +6,7 @@ from src.models.measure_model import measure_model
 from src.models.storage_model import storage_model
 from src.core.validator import validator, argument_exception, operation_exception
 from src.core.abstract_reference import abstact_reference
+from src.models.recipe_model import recipe_model
 import uuid
 import unittest
 
@@ -322,12 +323,12 @@ class test_models(unittest.TestCase):
     # Данные должны быть пустыми
     def test_create_empty_nomenclature_model(self):
         # Подготовка
-        nomeclature = nomeclature_model()
+        nomeclature = nomeclature_model.create_empty()
 
         # Действие
 
         # Проверки
-        assert nomeclature.full_name == ""
+        assert nomeclature.name == "Default_name"
         assert nomeclature.measure_unit is None
         assert nomeclature.nomenclature_group is None
 
@@ -335,15 +336,15 @@ class test_models(unittest.TestCase):
     # Данные с ошибками
     def test_invalid_data_nomenclature_model(self):
         # Подготовка
-        nomeclature = nomeclature_model()
+        nomeclature = nomeclature_model.create_empty()
 
         # Действие
 
         # Проверки
         with self.assertRaises(argument_exception):
-            nomeclature.full_name = dict()
+            nomeclature.name = dict()
         with self.assertRaises(argument_exception):
-            nomeclature.full_name = "A" * 256
+            nomeclature.name = "A" * 256
         with self.assertRaises(argument_exception):
             nomeclature.nomenclature_group = 512
         with self.assertRaises(argument_exception):
@@ -353,21 +354,55 @@ class test_models(unittest.TestCase):
     # Данные должны быть не пустые
     def test_create_not_empty_nomenclature_model(self):
         # подготовка
-        nomeclature = nomeclature_model()
-        nomeclature.full_name = "A" * 255
+        name = "A" * 255
+        group = nomenclature_group_model()
         measure = measure_model("грамм", 1)
-        nomeclature.measure_unit = measure
-        nomeclature.nomenclature_group = nomenclature_group_model()
+        nomeclature = nomeclature_model.create(name, group, measure)
 
         # действие
         
 
         # проверки
-        assert nomeclature.full_name == "A" * 255
+        assert nomeclature.name == "A" * 255
         assert nomeclature.measure_unit.name == "грамм"
         assert nomeclature.measure_unit.coef == 1
         assert nomeclature.measure_unit.base_unit is None
         assert isinstance(nomeclature.nomenclature_group, nomenclature_group_model)
+
+    # Проверить создание рецепта
+    # Данные должны быть пустые
+    def test_create_empty_recipe_model(self):
+        # подготовка
+        recipe = recipe_model()
+
+        # действие
+
+        # проверки
+        assert recipe.name == ""
+        assert isinstance(recipe.ingredients, dict)
+        assert len(recipe.ingredients) == 0
+        assert recipe.description.qsize() == 0
+
+    # Проверить создание рецепта
+    # Данные должны не пустые
+    def test_create_not_empty_recipe_model(self):
+        # подготовка
+        recipe = recipe_model()
+        recipe.name = "Запеканка"
+        measure_unit = measure_model.create_gramm()
+        group = nomenclature_group_model.create()
+        ingredient = nomeclature_model.create("Специи", group, measure_unit)
+        recipe.add_ingredient(ingredient, 20)
+        recipe.push("Печь до готовности")
+
+        # действие
+        step = recipe.pop()
+
+        # проверки
+        print(step)
+        assert recipe.name == "Запеканка"
+        assert recipe.ingredients["Специи"][0]==ingredient
+        assert step == "Печь до готовности"
 
 
 if __name__ == "__main__":
