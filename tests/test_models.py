@@ -399,7 +399,6 @@ class test_models(unittest.TestCase):
         step = recipe.pop()
 
         # проверки
-        print(step)
         assert recipe.name == "Запеканка"
         assert recipe.ingredients["Специи"][0]==ingredient
         assert step == "Печь до готовности"
