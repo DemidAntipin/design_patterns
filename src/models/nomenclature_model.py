@@ -2,13 +2,13 @@ from src.models.measure_model import measure_model
 from src.models.nomenclature_group_model import nomenclature_group_model
 from src.core.validator import validator
 from src.core.abstract_reference import abstact_reference
+import uuid
 
 ######################################
 # Модель номенклатуры
 class nomeclature_model(abstact_reference):
-    # полное наименование
-    __full_name: str = ""
-    
+    # Полное наименование номенклатуры (255)
+    __name: str = ""
     # группа номенклатуры
     __nomenclature_group: nomenclature_group_model = None
 
@@ -17,13 +17,13 @@ class nomeclature_model(abstact_reference):
 
     # Полное название номенклатуры
     @property
-    def full_name(self) -> str:
-        return self.__full_name
+    def name(self) -> str:
+        return self.__name
     
-    @full_name.setter
-    def full_name(self, value: str) -> str:
+    @name.setter
+    def name(self, value: str) -> str:
         validator.validate(value, str, 255)
-        self.__full_name = value
+        self.__name = value
 
     # Текущая группа номенклатуры
     @property
@@ -43,4 +43,16 @@ class nomeclature_model(abstact_reference):
     @measure_unit.setter
     def measure_unit(self, value: measure_model):
         validator.validate(value, measure_model)
-        self.__measure_unit = value    
+        self.__measure_unit = value
+
+    # Универсальный метод - фабричный.
+    @staticmethod
+    def create(name: str, group: nomenclature_group_model, measure_unit: measure_model):
+        validator.validate(name, str, 255)
+        validator.validate(group, nomenclature_group_model)
+        validator.validate(measure_unit, measure_model)
+        item = nomeclature_model()
+        item.name = name
+        item.nomenclature_group=group
+        item.measure_unit=measure_unit
+        return item
