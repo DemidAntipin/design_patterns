@@ -15,14 +15,6 @@ class measure_model(abstact_reference):
         self.coef = coef
         self.base_unit = base_unit
 
-    # Проверка на уникальность ед. измерения
-    __instances = {}
-    def __new__(cls, name, *args, **kwargs):
-        if not name in cls.__instances:
-            instance = super().__new__(cls)
-            cls.__instances[name] = instance
-        return cls.__instances[name]
-
     # Поле коэффициента пересчёта
     @property
     def coef(self) -> float:
@@ -44,9 +36,9 @@ class measure_model(abstact_reference):
         self.__base_unit = value
 
     @staticmethod
-    def create_kilogramm():
-        base_unit = measure_model.create_gramm()
-        return measure_model.create("килограмм", 1000, base_unit)
+    def create_kilogramm(gramm):
+        validator.validate(gramm, measure_model)
+        return measure_model.create("килограмм", 1000, gramm)
 
     @staticmethod
     def create_gramm():

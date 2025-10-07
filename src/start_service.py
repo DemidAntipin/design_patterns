@@ -18,26 +18,38 @@ class start_service():
     # метод для генерации эталонных ед. измерения
     def __create_default_measures(self):
         self.__repo.data[reposity.measure_key()] = {}
-        for measure in dir(measure_model):
-            if measure.startswith("create_"):
-                measure_name = measure.split("_")[1]
-                self.__repo.data[reposity.measure_key()][measure_name] = getattr(measure_model, measure)()
+        gramm = measure_model.create_gramm()
+        kilogramm = measure_model.create_kilogramm(gramm)
+        piece = measure_model.create_piece()
+        measures=[gramm, kilogramm, piece]
+        for measure in measures:
+            # Проверка на уникальность
+            if not measure.name in self.__repo.data[reposity.measure_key()]:
+                self.__repo.data[reposity.measure_key()][measure.name] = measure
     
     # метод для генерации эталонных групп номенклатур
     def __create_default_nomenclature_groups(self):
         self.__repo.data[reposity.nomenclature_group_key()] = {}
-        self.__repo.data[reposity.nomenclature_group_key()]["empty"] = nomenclature_group_model.create()
+        empty_group = nomenclature_group_model.create()
+        # Проверка на уникальность
+        if not "empty" in self.__repo.data[reposity.nomenclature_group_key()]:
+            self.__repo.data[reposity.nomenclature_group_key()]["empty"]=empty_group
 
     # метод для генерации эталонных номенклатур
     def __create_default_nomenclatures(self):
         self.__repo.data[reposity.nomenclature_key()] = {}
-        self.__repo.data[reposity.nomenclature_key()]["Картофель"] = nomeclature_model.create("Картофель", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["gramm"])
-        self.__repo.data[reposity.nomenclature_key()]["Грибы"] = nomeclature_model.create("Грибы", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["gramm"])
-        self.__repo.data[reposity.nomenclature_key()]["Лук"] = nomeclature_model.create("Лук", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["piece"])
-        self.__repo.data[reposity.nomenclature_key()]["Кетчуп"] = nomeclature_model.create("Кетчуп", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["gramm"])
-        self.__repo.data[reposity.nomenclature_key()]["Майонез"] = nomeclature_model.create("Майонез", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["gramm"])
-        self.__repo.data[reposity.nomenclature_key()]["Сыр"] = nomeclature_model.create("Сыр", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["gramm"])
-        self.__repo.data[reposity.nomenclature_key()]["Помидор"] = nomeclature_model.create("Помидор", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["piece"])
+        potato = nomeclature_model.create("Картофель", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
+        mushroom = nomeclature_model.create("Грибы", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
+        onion = nomeclature_model.create("Лук", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["шт"])
+        ketchup = nomeclature_model.create("Кетчуп", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
+        mayo = nomeclature_model.create("Майонез", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
+        cheese = nomeclature_model.create("Сыр", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
+        tomato = nomeclature_model.create("Помидор", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["шт"])
+        nomenclatures = [potato, mushroom, onion, ketchup, mayo, cheese, tomato]
+        for nomenclature in nomenclatures:
+            # Проверка на уникальность
+            if not nomenclature.name in self.__repo.data[reposity.nomenclature_key()]:
+                self.__repo.data[reposity.nomenclature_key()][nomenclature.name] = nomenclature
 
     # метод для генерации эталонных рецептов
     def __create_default_recipes(self):
@@ -58,7 +70,9 @@ class start_service():
                      "Поставьте запеканку в предварительно разогретую духовку до 200°C. Выпекать 60 минут, после чего дайте запеканке остыть. В горячем виде запеканка разваливается на части."]
         for step in algorithm:
             recipe.push(step)
-        self.__repo.data[reposity.recipe_key()]["default_recipe"] = recipe
+        # Проверка на уникальность
+        if not "default_recipe" in self.__repo.data[reposity.recipe_key()]:
+            self.__repo.data[reposity.recipe_key()]["default_recipe"] = recipe
 
     @property
     def data(self):

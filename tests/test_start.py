@@ -22,11 +22,10 @@ class test_start(unittest.TestCase):
 
         # проверки
         assert len(self.__start_service.data[reposity.measure_key()]) > 0
-        assert self.__start_service.data[reposity.measure_key()]["gramm"].name == "грамм"
-        assert self.__start_service.data[reposity.measure_key()]["kilogramm"].name == "килограмм"
-        assert self.__start_service.data[reposity.measure_key()]["piece"].name == "шт"
-        assert self.__start_service.data[reposity.measure_key()]["gramm"] == gramm
-        assert self.__start_service.data[reposity.measure_key()]["kilogramm"].base_unit == gramm
+        assert self.__start_service.data[reposity.measure_key()]["грамм"].name == "грамм"
+        assert self.__start_service.data[reposity.measure_key()]["килограмм"].name == "килограмм"
+        assert self.__start_service.data[reposity.measure_key()]["шт"].name == "шт"
+        assert self.__start_service.data[reposity.measure_key()]["грамм"] == self.__start_service.data[reposity.measure_key()]["килограмм"].base_unit
 
     # Проверка генерации эталонных групп номенклатуры
     # данные доступны по ключу "nomenclature_group_key"
@@ -43,7 +42,7 @@ class test_start(unittest.TestCase):
     # Для каждого elem из списка существует номенклатура с именем elem[0], группой empty и ед. измерения elem[1]
     def test_nomenclature_start_service(self):
         # подготовка
-        ingredient_list = [("Картофель", "gramm"), ("Грибы", "gramm"), ("Лук", "piece"), ("Кетчуп", "gramm"), ("Майонез", "gramm"), ("Сыр", "gramm"), ("Помидор", "piece")]
+        ingredient_list = [("Картофель", "грамм"), ("Грибы", "грамм"), ("Лук", "шт"), ("Кетчуп", "грамм"), ("Майонез", "грамм"), ("Сыр", "грамм"), ("Помидор", "шт")]
 
 
         # действие

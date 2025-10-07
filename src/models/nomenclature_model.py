@@ -6,24 +6,14 @@ import uuid
 
 ######################################
 # Модель номенклатуры
-class nomeclature_model(abstact_reference):    
+class nomeclature_model(abstact_reference):
+    # Полное наименование номенклатуры (255)
+    __name: str = ""
     # группа номенклатуры
     __nomenclature_group: nomenclature_group_model = None
 
     # единица измерения
     __measure_unit: measure_model = None
-
-    # Проверка на уникальность номенклатуры
-    __instances = {}
-    def __new__(cls, name, *args, **kwargs):
-        if not name in cls.__instances:
-            instance = super().__new__(cls)
-            cls.__instances[name] = instance
-        return cls.__instances[name]
-
-    def __init__(self, name:str):
-        super().__init__()
-        self.name=name
 
     # Полное название номенклатуры
     @property
@@ -61,14 +51,8 @@ class nomeclature_model(abstact_reference):
         validator.validate(name, str, 255)
         validator.validate(group, nomenclature_group_model)
         validator.validate(measure_unit, measure_model)
-        item = nomeclature_model(name)
+        item = nomeclature_model()
+        item.name = name
         item.nomenclature_group=group
         item.measure_unit=measure_unit
-        return item
-    
-    @staticmethod
-    def create_empty():
-        id = uuid.uuid4().hex
-        item = nomeclature_model(id)
-        item.name = "Default_name"
         return item

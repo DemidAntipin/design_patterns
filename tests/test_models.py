@@ -323,12 +323,12 @@ class test_models(unittest.TestCase):
     # Данные должны быть пустыми
     def test_create_empty_nomenclature_model(self):
         # Подготовка
-        nomeclature = nomeclature_model.create_empty()
+        nomeclature = nomeclature_model()
 
         # Действие
 
         # Проверки
-        assert nomeclature.name == "Default_name"
+        assert nomeclature.name == ""
         assert nomeclature.measure_unit is None
         assert nomeclature.nomenclature_group is None
 
@@ -336,7 +336,7 @@ class test_models(unittest.TestCase):
     # Данные с ошибками
     def test_invalid_data_nomenclature_model(self):
         # Подготовка
-        nomeclature = nomeclature_model.create_empty()
+        nomeclature = nomeclature_model()
 
         # Действие
 
