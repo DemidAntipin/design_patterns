@@ -57,9 +57,11 @@ class start_service():
         recipe = recipe_model()
         recipe.name = "Картофельная запеканка с грибами"
         ingredient_list = [("Картофель", 400), ("Грибы", 300), ("Лук", 1), ("Кетчуп", 200), ("Майонез", 200), ("Сыр", 200), ("Помидор", 3)]
+        ingredients=[]
         for ingredient in ingredient_list:
             ingredient_name, ingredient_count = ingredient
-            recipe.add_ingredient(self.__repo.data[reposity.nomenclature_key()][ingredient_name], ingredient_count)
+            ingredients.append((self.__repo.data[reposity.nomenclature_key()][ingredient_name], ingredient_count))
+        recipe.ingredients = ingredients
         algorithm = ["Как приготовить вкустную картофельную запеканку? Подготовьте необходимые продукты. Из данного количества у меня получилось 3 большие порции.", 
                      "Картофель почистить, порезать крупными кусочками и равномерно распределить по противеню.", 
                      "Предварительно сварите грибы, порежьте средними кусочками и добавьте в запеканку.", 
@@ -68,8 +70,7 @@ class start_service():
                      "Порежьте помидоры кружочками и разложите по запеканке.", 
                      "Обильно посыпать запеканку сверху тертым сыром.", 
                      "Поставьте запеканку в предварительно разогретую духовку до 200°C. Выпекать 60 минут, после чего дайте запеканке остыть. В горячем виде запеканка разваливается на части."]
-        for step in algorithm:
-            recipe.push(step)
+        recipe.description = algorithm
         # Проверка на уникальность
         if not "default_recipe" in self.__repo.data[reposity.recipe_key()]:
             self.__repo.data[reposity.recipe_key()]["default_recipe"] = recipe

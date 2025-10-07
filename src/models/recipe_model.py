@@ -1,42 +1,39 @@
 from src.core.validator import validator
 from src.core.abstract_reference import abstact_reference
 from src.models.nomenclature_model import nomeclature_model
-from queue import Queue
 
 # модель рецепта
 class recipe_model(abstact_reference):
     # список ингредиентов
     __ingredients: dict = None
     # алгоритм приготовления
-    __description: Queue = None
+    __description: list = None
 
     def __init__(self):
        super().__init__()
        self.__ingredients: dict = dict()
-       self.__description: Queue = Queue()
+       self.__description: list = list()
 
     @property
     def ingredients(self) -> dict:
         return self.__ingredients
     
-    # метод для добавления ингредиента
-    def add_ingredient(self, ingredient: nomeclature_model, count: int):
-        # номенклатура ингредиента
-        validator.validate(ingredient, nomeclature_model)
-        # количество ингредиента в ед. измерения указанной в ingredient.measure_unit
-        validator.validate(count, int)
-        self.ingredients[ingredient.name] = (ingredient, count)
+    @ingredients.setter
+    def ingredients(self, ingredient_list: list):
+        validator.validate(ingredient_list, list)
+        for ingredient in ingredient_list:
+            validator.validate(ingredient, tuple)
+            validator.validate(ingredient[0], nomeclature_model)
+            validator.validate(ingredient[1], int)
+            self.ingredients[ingredient[0].name] = (ingredient[0], ingredient[1])
 
     @property
-    def description(self) -> Queue:
+    def description(self) -> list:
         return self.__description
-
-    # метод для нового шага алгоритма
-    def push(self, elem: str):
-        validator.validate(elem, str, 255)
-        self.description.put(elem)
-
-    # метод для извлечения текущего шага алгоритма
-    def pop(self) -> str:
-        elem = self.description.get()
-        return elem
+    
+    @description.setter
+    def description(self, algorithm: list):
+        validator.validate(algorithm, list)
+        for step in algorithm:
+            validator.validate(step, str)
+            self.description.append(step)

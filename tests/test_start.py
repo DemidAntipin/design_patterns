@@ -79,7 +79,6 @@ class test_start(unittest.TestCase):
         for (key, measure) in ingredient_list:
             assert recipe.ingredients[key][0] == self.__start_service.data[reposity.nomenclature_key()][key]
             assert recipe.ingredients[key][1] == measure
-        assert recipe.description.qsize() == 8
+        assert len(recipe.description) == 8
         for step in algorithm:
-            assert step == recipe.pop()
-        assert recipe.description.qsize() == 0
+            assert step in recipe.description
