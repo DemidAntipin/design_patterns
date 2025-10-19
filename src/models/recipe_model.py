@@ -1,21 +1,22 @@
 from src.core.validator import validator
 from src.core.abstract_reference import abstact_reference
 from src.models.nomenclature_model import nomeclature_model
+from src.core.entity_model import entity_model
 
 # модель рецепта
-class recipe_model(abstact_reference):
+class recipe_model(entity_model):
     # список ингредиентов
-    __ingredients: dict = None
+    __ingredients: list = None
     # алгоритм приготовления
     __description: list = None
 
     def __init__(self):
        super().__init__()
-       self.__ingredients: dict = dict()
+       self.__ingredients: list = list()
        self.__description: list = list()
 
     @property
-    def ingredients(self) -> dict:
+    def ingredients(self) -> list:
         return self.__ingredients
     
     @ingredients.setter
@@ -25,7 +26,7 @@ class recipe_model(abstact_reference):
             validator.validate(ingredient, tuple)
             validator.validate(ingredient[0], nomeclature_model)
             validator.validate(ingredient[1], int)
-            self.ingredients[ingredient[0].name] = (ingredient[0], ingredient[1])
+            self.ingredients.append((ingredient[0], ingredient[1]))
 
     @property
     def description(self) -> list:

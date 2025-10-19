@@ -27,3 +27,25 @@ class reposity:
     def recipe_key():
         return "recipe_model"
     
+    """
+    Получить список всех ключей
+    """
+    @staticmethod
+    def keys() -> list:
+        result = []
+        methods = [method for method in dir(reposity) if
+                    callable(getattr(reposity, method)) and method.endswith('_key')]
+        for method in methods:
+            key = getattr(reposity, method)()
+            result.append(key)
+
+        return result
+
+    
+    """
+    Инициализация
+    """
+    def initalize(self):
+        keys = reposity.keys()
+        for key in keys:
+            self.__data[ key ] = []

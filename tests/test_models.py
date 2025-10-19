@@ -379,7 +379,7 @@ class test_models(unittest.TestCase):
 
         # проверки
         assert recipe.name == ""
-        assert isinstance(recipe.ingredients, dict)
+        assert isinstance(recipe.ingredients, list)
         assert len(recipe.ingredients) == 0
         assert isinstance(recipe.description, list)
         assert len(recipe.description) == 0
@@ -391,7 +391,7 @@ class test_models(unittest.TestCase):
         recipe = recipe_model()
         recipe.name = "Запеканка"
         measure_unit = measure_model.create_gramm()
-        group = nomenclature_group_model.create()
+        group = nomenclature_group_model()
         ingredient = nomeclature_model.create("Специи", group, measure_unit)
         recipe.ingredients = [(ingredient, 20)]
         recipe.description = ["Печь до готовности"]
@@ -400,8 +400,8 @@ class test_models(unittest.TestCase):
 
         # проверки
         assert recipe.name == "Запеканка"
-        assert recipe.ingredients["Специи"][0]==ingredient
-        assert recipe.ingredients["Специи"][1]==20
+        assert recipe.ingredients[0][0]==ingredient
+        assert recipe.ingredients[0][1]==20
         assert "Печь до готовности" in recipe.description
 
 

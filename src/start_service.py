@@ -3,84 +3,161 @@ from src.models.measure_model import measure_model
 from src.models.recipe_model import recipe_model
 from src.models.nomenclature_model import nomeclature_model
 from src.models.nomenclature_group_model import nomenclature_group_model
+from src.dtos.nomenclature_dto import nomenclature_dto
+from src.dtos.measure_dto import measure_dto
+from src.dtos.category_dto import category_dto
+from src.core.validator import validator, argument_exception, operation_exception
+import os
+import json
 
 class start_service():
     __repo:reposity = reposity()
 
+    # Словарь который содержит загруженные и инициализованные инстансы нужных объектов
+    # Ключ - id записи, значение - abstract_model
+    __cache = {}
+
+    # Наименование файла (полный путь)
+    __full_file_name:str = ""
+
     def __init__(self):
-        self.__repo.data[reposity.measure_key()] = {}
+        self.__repo.initalize()
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
             cls.instance = super(start_service, cls).__new__(cls)
         return cls.instance
-    
-    # метод для генерации эталонных ед. измерения
-    def __create_default_measures(self):
-        self.__repo.data[reposity.measure_key()] = {}
-        gramm = measure_model.create_gramm()
-        kilogramm = measure_model.create_kilogramm(gramm)
-        piece = measure_model.create_piece()
-        measures=[gramm, kilogramm, piece]
+
+     # Текущий файл
+    @property
+    def file_name(self) -> str:
+        return self.__full_file_name
+
+    # Полный путь к файлу настроек
+    @file_name.setter
+    def file_name(self, value:str):
+        validator.validate(value, str)
+        full_file_name = os.path.abspath(value)        
+        if os.path.exists(full_file_name):
+            self.__full_file_name = full_file_name.strip()
+        else:
+            raise argument_exception(f'Не найден файл настроек {full_file_name}')
+
+    # Загрузить настройки из Json файла
+    def load(self) -> bool:
+        if self.__full_file_name == "":
+            raise operation_exception("Не найден файл настроек!")
+
+        try:
+            with open( self.__full_file_name, 'r', encoding="utf-8") as file_instance:
+                settings = json.load(file_instance)
+
+                if "default_recipe" in settings.keys():
+                    data = settings["default_recipe"]
+                    return self.convert(data)
+
+            return False
+        except Exception as e:
+            error_message = str(e)
+            raise Exception(error_message)
+        
+    # Сохранить элемент в репозитории
+    def __save_item(self, key:str, dto, item):
+        validator.validate(key, str)
+        item.unique_code = dto.id
+        self.__cache.setdefault(dto.id, item)
+        self.__repo.data[ key ].append(item)
+
+    # Загрузить единицы измерений   
+    def __convert_measures(self, data: dict) -> bool:
+        validator.validate(data, dict)
+        measures = data['measures'] if 'measures' in data else []    
+        if len(measures) == 0:
+            return False
+         
         for measure in measures:
-            # Проверка на уникальность
-            if not measure.name in self.__repo.data[reposity.measure_key()]:
-                self.__repo.data[reposity.measure_key()][measure.name] = measure
-    
-    # метод для генерации эталонных групп номенклатур
-    def __create_default_nomenclature_groups(self):
-        self.__repo.data[reposity.nomenclature_group_key()] = {}
-        empty_group = nomenclature_group_model.create()
-        # Проверка на уникальность
-        if not "empty" in self.__repo.data[reposity.nomenclature_group_key()]:
-            self.__repo.data[reposity.nomenclature_group_key()]["empty"]=empty_group
+            dto = measure_dto().create(measure)
+            item = measure_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.measure_key(), dto, item )
 
-    # метод для генерации эталонных номенклатур
-    def __create_default_nomenclatures(self):
-        self.__repo.data[reposity.nomenclature_key()] = {}
-        potato = nomeclature_model.create("Картофель", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
-        mushroom = nomeclature_model.create("Грибы", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
-        onion = nomeclature_model.create("Лук", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["шт"])
-        ketchup = nomeclature_model.create("Кетчуп", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
-        mayo = nomeclature_model.create("Майонез", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
-        cheese = nomeclature_model.create("Сыр", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["грамм"])
-        tomato = nomeclature_model.create("Помидор", self.__repo.data[reposity.nomenclature_group_key()]["empty"], self.__repo.data[reposity.measure_key()]["шт"])
-        nomenclatures = [potato, mushroom, onion, ketchup, mayo, cheese, tomato]
+        return True
+
+    # Загрузить группы номенклатуры
+    def __convert_groups(self, data: dict) -> bool:
+        validator.validate(data, dict)
+        categories =  data['categories'] if 'categories' in data else []    
+        if len(categories) == 0:
+            return False
+
+        for category in  categories:
+            dto = category_dto().create(category)    
+            item = nomenclature_group_model.from_dto(dto, self.__cache )
+            self.__save_item( reposity.nomenclature_group_key(), dto, item )
+
+        return True
+
+    # Загрузить номенклатуру
+    def __convert_nomenclatures(   self, data: dict) -> bool:
+        validator.validate(data, dict)      
+        nomenclatures = data['nomenclatures'] if 'nomenclatures' in data else []   
+        if len(nomenclatures) == 0:
+            return False
+         
         for nomenclature in nomenclatures:
-            # Проверка на уникальность
-            if not nomenclature.name in self.__repo.data[reposity.nomenclature_key()]:
-                self.__repo.data[reposity.nomenclature_key()][nomenclature.name] = nomenclature
+            dto = nomenclature_dto().create(nomenclature)
+            item = nomeclature_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.nomenclature_key(), dto, item )
 
-    # метод для генерации эталонных рецептов
-    def __create_default_recipes(self):
-        self.__repo.data[reposity.recipe_key()] = {}
-        recipe = recipe_model()
-        recipe.name = "Картофельная запеканка с грибами"
-        ingredient_list = [("Картофель", 400), ("Грибы", 300), ("Лук", 1), ("Кетчуп", 200), ("Майонез", 200), ("Сыр", 200), ("Помидор", 3)]
-        ingredients=[]
-        for ingredient in ingredient_list:
-            ingredient_name, ingredient_count = ingredient
-            ingredients.append((self.__repo.data[reposity.nomenclature_key()][ingredient_name], ingredient_count))
-        recipe.ingredients = ingredients
-        algorithm = ["Как приготовить вкустную картофельную запеканку? Подготовьте необходимые продукты. Из данного количества у меня получилось 3 большие порции.", 
-                     "Картофель почистить, порезать крупными кусочками и равномерно распределить по противеню.", 
-                     "Предварительно сварите грибы, порежьте средними кусочками и добавьте в запеканку.", 
-                     "Крупную луковицу порезать кольцами и распределить по противеню.", 
-                     "Выдавить сетку из майонеза и кетчупа, размещать тонким слоем по запеканке.", 
-                     "Порежьте помидоры кружочками и разложите по запеканке.", 
-                     "Обильно посыпать запеканку сверху тертым сыром.", 
-                     "Поставьте запеканку в предварительно разогретую духовку до 200°C. Выпекать 60 минут, после чего дайте запеканке остыть. В горячем виде запеканка разваливается на части."]
-        recipe.description = algorithm
-        # Проверка на уникальность
-        if not "default_recipe" in self.__repo.data[reposity.recipe_key()]:
-            self.__repo.data[reposity.recipe_key()]["default_recipe"] = recipe
+        return True        
 
+
+    # Обработать полученный словарь    
+    def convert(self, data: dict) -> bool:
+        validator.validate(data, dict)
+
+        # 1 Созданим рецепт
+        name = data['name'] if 'name' in data else "НЕ ИЗВЕСТНО"
+        self.__default_recipe = recipe_model.create(name)
+
+        # Загрузим шаги приготовления
+        steps =  data['steps'] if 'steps' in data else []
+        for step in steps:
+            if step.strip() != "":
+                validator.validate(step, str)
+        self.__default_recipe.description = steps
+
+        self.__convert_measures(data)
+        self.__convert_groups(data)
+        self.__convert_nomenclatures(data)        
+
+
+        # Собираем рецепт
+        compositions =  data['composition'] if 'composition' in data else []
+        ingredients_list = []
+        for composition in compositions:
+            namnomenclature_id = composition['nomenclature_id'] if 'nomenclature_id' in composition else ""
+            value  = composition['value'] if 'value' in composition else ""
+            nomenclature = self.__cache[namnomenclature_id] if namnomenclature_id in self.__cache else None
+            item =(nomenclature, value)
+            ingredients_list.append(item)
+        self.__default_recipe.ingredients = ingredients_list
+            
+        # Сохраняем рецепт
+        self.__repo.data[ reposity.recipe_key()].append(self.__default_recipe)
+        return True
+
+    """
+    Стартовый набор данных
+    """
     @property
     def data(self):
-        return self.__repo.data
-    # основной метод для генерации эталонных данных
+        return self.__repo.data   
+
+    """
+    Основной метод для генерации эталонных данных
+    """
     def start(self):
-        self.__create_default_measures()
-        self.__create_default_nomenclature_groups()
-        self.__create_default_nomenclatures()
-        self.__create_default_recipes()
+        self.file_name = "settings.json"
+        result = self.load()
+        if result == False:
+            raise operation_exception("Невозможно сформировать стартовый набор данных!")
