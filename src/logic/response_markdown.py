@@ -2,9 +2,10 @@ from src.core.abstract_response import abstract_response
 from src.core.common import common
 from src.core.validator import operation_exception
 
-# Форматирование ответа в csv
-# Первая строка ответа соответствует названиям полей данных в data, разделенных ';'.
-# Вторая строка содержит простые значения полей данных (int, str), разделенных ';'.
+# Форматирование ответа в markdown
+# Первая строка ответа соответствует заголовкам - названиям полей данных в data, разделенных '|'.
+# Вторая строчка ответа включает разделитель заголовка и данных.
+# Третья строка содержит простые значения полей данных (int, str), разделенных '|'.
 # Значения типа list записаются в несколько строчек, где каждая строчка соответствует значению 1 элемента list.
 # Вместо значений классов записывается unique_code класса.
 # 
@@ -16,30 +17,35 @@ from src.core.validator import operation_exception
 #       ingredients = [ing1, ing2, ing3]
 #   } 
 #
-# Соответствует следующий csv:
-#   unique_code;name;description;ingredients;
-#   7f4ecdab-0f01-4216-8b72-4c91d22b8918;default_recipe;step_1;ing1.unique_code;
-#   ;;step_2;ing2.unique_code;
-#   ;;step_3;ing3.unique_code;
-class response_csv(abstract_response):
+# Соответствует следующий markdown:
+#   |unique_code|name|description|ingredients|
+#   |:---|:---|:---|:---|
+#   |7f4ecdab-0f01-4216-8b72-4c91d22b8918|default_recipe|step_1;ing1.unique_code|
+#   ||step_2|ing2.unique_code|
+#   ||step_3|ing3.unique_code|
+class response_markdown(abstract_response):
 
-    # Сформировать CSV
-    def create(self, format: str, data: list):
+    # Сформировать MARKDOWN
+    def create(self, format:str, data: list):
         text = super().create(format, data)
 
-        # Шапка
-        item = data[0]
-        fields = common.get_fields(item)
-        for field in fields:
-            text += f"{field};"
-        text += "\n"
+        header = "|"
 
-        # Форматирование значения
         def format_value(value):
             if hasattr(value, 'unique_code'):
                return str(value.unique_code)
             else:
                 return str(value)
+
+        # Шапка
+        item = data [0]
+        fields = common.get_fields( item )
+        for field in fields:
+            header += f"{field}|"
+        header += "\n"
+        text += header
+
+        text += "|" + "|".join([":---"] * len(fields)) + "|\n"
 
         # Данные
         for item in data:
@@ -56,12 +62,13 @@ class response_csv(abstract_response):
                 else:
                     field_values[field] = [format_value(value)]
             for i in range(max_list_length):
+                text += "|"
                 for field in fields:
                     values = field_values[field]
                     if i < len(values):
-                        text += f"{values[i]};"
+                        text += f"{values[i]}|"
                     else:
-                        text += ";"
+                        text += "|"
                 text += "\n"
 
-        return text
+        return text   

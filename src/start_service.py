@@ -3,6 +3,7 @@ from src.models.measure_model import measure_model
 from src.models.recipe_model import recipe_model
 from src.models.nomenclature_model import nomeclature_model
 from src.models.nomenclature_group_model import nomenclature_group_model
+from src.models.ingredient_model import ingredient_model
 from src.dtos.nomenclature_dto import nomenclature_dto
 from src.dtos.measure_dto import measure_dto
 from src.dtos.category_dto import category_dto
@@ -138,12 +139,13 @@ class start_service():
             namnomenclature_id = composition['nomenclature_id'] if 'nomenclature_id' in composition else ""
             value  = composition['value'] if 'value' in composition else ""
             nomenclature = self.__cache[namnomenclature_id] if namnomenclature_id in self.__cache else None
-            item =(nomenclature, value)
+            item = ingredient_model.create(nomenclature, value)
             ingredients_list.append(item)
         self.__default_recipe.ingredients = ingredients_list
             
         # Сохраняем рецепт
         self.__repo.data[ reposity.recipe_key()].append(self.__default_recipe)
+
         return True
 
     """
@@ -156,8 +158,8 @@ class start_service():
     """
     Основной метод для генерации эталонных данных
     """
-    def start(self):
-        self.file_name = "settings.json"
+    def start(self, file="settings.json"):
+        self.file_name = file
         result = self.load()
         if result == False:
             raise operation_exception("Невозможно сформировать стартовый набор данных!")

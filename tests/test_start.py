@@ -18,7 +18,7 @@ class test_start(unittest.TestCase):
         # Проверка
         assert len(start.data[ reposity.measure_key()]) > 0
 
-    # Проверить уникальность элемиентов
+    # Проверить уникальность элементов
     def test_checkUnique_start_service_load(self):
         # Подготовка
         start = start_service()

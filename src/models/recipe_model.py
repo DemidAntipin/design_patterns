@@ -1,7 +1,7 @@
 from src.core.validator import validator
-from src.core.abstract_reference import abstact_reference
 from src.models.nomenclature_model import nomeclature_model
 from src.core.entity_model import entity_model
+from src.models.ingredient_model import ingredient_model
 
 # модель рецепта
 class recipe_model(entity_model):
@@ -15,6 +15,15 @@ class recipe_model(entity_model):
        self.__ingredients: list = list()
        self.__description: list = list()
 
+    @staticmethod
+    def create(name):
+        validator.validate(name, str)
+        item = recipe_model()
+        item.name = name
+        item.ingredients = list()
+        item.description = list()
+        return item
+
     @property
     def ingredients(self) -> list:
         return self.__ingredients
@@ -23,10 +32,8 @@ class recipe_model(entity_model):
     def ingredients(self, ingredient_list: list):
         validator.validate(ingredient_list, list)
         for ingredient in ingredient_list:
-            validator.validate(ingredient, tuple)
-            validator.validate(ingredient[0], nomeclature_model)
-            validator.validate(ingredient[1], int)
-            self.ingredients.append((ingredient[0], ingredient[1]))
+            validator.validate(ingredient, ingredient_model)
+            self.__ingredients.append(ingredient)
 
     @property
     def description(self) -> list:
