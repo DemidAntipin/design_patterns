@@ -62,7 +62,6 @@ def build_response():
     models = service.data[model_type]
     result = factory.create(format)().create(format, models)
 
-    print(result)
     return Response(result, content_type=content_type)
 
 

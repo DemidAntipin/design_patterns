@@ -21,6 +21,7 @@ import html
 #   } 
 #
 # Соответствует следующий json:
+# <root>
 #   <object>
 #      <unique_code>7f4ecdab-0f01-4216-8b72-4c91d22b8918</unique_code>
 #      <name>default_recipe</name>
@@ -56,15 +57,16 @@ import html
 #           </item>
 #      </ingredients>
 #   </object>
+# </root>
 class response_xml(abstract_response):
     
     # Сформировать XML
-    def create(self, format: str, data: list):
+    def create(self, format: str, data: list, __is_root=True):
         text = super().create(format, data)
         
         def format_value(value):
             if hasattr(value, 'unique_code'):
-               return html.unescape(self.create(format, [value]))
+               return html.unescape(self.create(format, [value], False))
             else:
                 return str(value)
 
@@ -84,4 +86,6 @@ class response_xml(abstract_response):
                 else:
                     field_element.text = format_value(value)
             text += html.unescape(ET.tostring(object, encoding="unicode"))
+        if __is_root:
+            text = f'<?xml version="1.0" encoding="unicode"?><root>{text}</root>'
         return text
