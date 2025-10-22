@@ -1,10 +1,11 @@
 from src.core import validator
 from src.core import abstact_reference
+from src.core.entity_model import entity_model
 import uuid
 
 ###############################################
 # Модель организации
-class company_model(abstact_reference):
+class company_model(entity_model):
     __inn:int = 0
     __bic:int = 0
     __corr_account:int = 0

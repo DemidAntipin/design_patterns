@@ -1,12 +1,5 @@
 {
-    "company": {
-        "name": "test",
-        "inn": 123456789012,
-        "account": 12345678901,
-        "corr_account": 12345678901,
-        "bic": 123456789,
-        "ownership": "OOOOO"
-    },
+    "company": {},
     "default_recipe":
     {
         "name":"Картофельная запеканка с грибами",

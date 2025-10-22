@@ -1,12 +1,13 @@
 from src.models.measure_model import measure_model
 from src.models.nomenclature_group_model import nomenclature_group_model
 from src.core.validator import validator
-from src.core.abstract_reference import abstact_reference
+from src.dtos.nomenclature_dto import nomenclature_dto
+from src.core.entity_model import entity_model
 import uuid
 
 ######################################
 # Модель номенклатуры
-class nomeclature_model(abstact_reference):
+class nomeclature_model(entity_model):
     # Полное наименование номенклатуры (255)
     __name: str = ""
     # группа номенклатуры
@@ -55,4 +56,15 @@ class nomeclature_model(abstact_reference):
         item.name = name
         item.nomenclature_group=group
         item.measure_unit=measure_unit
+        return item
+    
+    """
+    Фабричный метод из Dto
+    """
+    def from_dto(dto:nomenclature_dto, cache:dict):
+        validator.validate(dto, nomenclature_dto)
+        validator.validate(cache, dict)
+        range =  cache[ dto.measure_id ] if dto.measure_id in cache else None
+        category =  cache[ dto.category_id] if dto.category_id in cache else None
+        item  = nomeclature_model.create(dto.name, category, range)
         return item

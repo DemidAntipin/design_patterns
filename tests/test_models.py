@@ -4,6 +4,7 @@ from src.models.nomenclature_group_model import nomenclature_group_model
 from src.models.nomenclature_model import nomeclature_model
 from src.models.measure_model import measure_model
 from src.models.storage_model import storage_model
+from src.models.ingredient_model import ingredient_model
 from src.core.validator import validator, argument_exception, operation_exception
 from src.core.abstract_reference import abstact_reference
 from src.models.recipe_model import recipe_model
@@ -379,7 +380,7 @@ class test_models(unittest.TestCase):
 
         # проверки
         assert recipe.name == ""
-        assert isinstance(recipe.ingredients, dict)
+        assert isinstance(recipe.ingredients, list)
         assert len(recipe.ingredients) == 0
         assert isinstance(recipe.description, list)
         assert len(recipe.description) == 0
@@ -391,17 +392,17 @@ class test_models(unittest.TestCase):
         recipe = recipe_model()
         recipe.name = "Запеканка"
         measure_unit = measure_model.create_gramm()
-        group = nomenclature_group_model.create()
-        ingredient = nomeclature_model.create("Специи", group, measure_unit)
-        recipe.ingredients = [(ingredient, 20)]
+        group = nomenclature_group_model()
+        nomenclature = nomeclature_model.create("Специи", group, measure_unit)
+        ingredient = ingredient_model.create(nomenclature, 20)
+        recipe.ingredients = [ingredient]
         recipe.description = ["Печь до готовности"]
 
         # действие
 
         # проверки
         assert recipe.name == "Запеканка"
-        assert recipe.ingredients["Специи"][0]==ingredient
-        assert recipe.ingredients["Специи"][1]==20
+        assert recipe.ingredients[0]==ingredient
         assert "Печь до готовности" in recipe.description
 
 

@@ -1,8 +1,9 @@
-from src.core.abstract_reference import abstact_reference
+from src.dtos.measure_dto import measure_dto
+from src.core.entity_model import entity_model
 from src.core.validator import validator
 
 # Модель единиц измерения для моделей номенклатуры
-class measure_model(abstact_reference):
+class measure_model(entity_model):
     # Базовая единица измерения
     __base_unit = None
     # Коэффициент пересчёта
@@ -58,4 +59,14 @@ class measure_model(abstact_reference):
             validator.validate(base, measure_model)
             inner_base = base
         item = measure_model(name, coef, inner_base)
+        return item
+    
+    """
+    Фабричный метод из Dto
+    """
+    def from_dto(dto:measure_dto, cache:dict):
+        validator.validate(dto, measure_dto)
+        validator.validate(cache, dict)
+        base  = cache[ dto.base_id ] if dto.base_id in cache else None
+        item = measure_model.create(dto.name, dto.value, base)
         return item
