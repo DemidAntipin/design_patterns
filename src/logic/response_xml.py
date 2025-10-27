@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from src.core.abstract_response import abstract_response
+from src.core.response_format import response_format
 from src.core.common import common
 import html
 
@@ -61,12 +62,12 @@ import html
 class response_xml(abstract_response):
     
     # Сформировать XML
-    def create(self, format: str, data: list, __is_root=True):
-        text = super().create(format, data)
+    def create(self, data: list, __is_root=True):
+        text = super().create(response_format.xml_format(), data)
         
         def format_value(value):
             if hasattr(value, 'unique_code'):
-               return html.unescape(self.create(format, [value], False))
+               return html.unescape(self.create([value], False))
             else:
                 return str(value)
 

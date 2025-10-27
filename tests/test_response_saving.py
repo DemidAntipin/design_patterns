@@ -42,7 +42,7 @@ class test_response_results_saving(unittest.TestCase):
                 file_path.touch(exist_ok=True)
 
                 data = self.__start_service.data[model]
-                result = response.create(format, data)
+                result = response.create(data)
                 with open(file_path, 'w', encoding="utf-8") as file:
                     file.write(result)
                     file.close()

@@ -1,6 +1,7 @@
 from src.core.abstract_response import abstract_response
 from src.core.common import common
 from src.core.validator import operation_exception
+from src.core.response_format import response_format
 
 # Форматирование ответа в csv
 # Первая строка ответа соответствует названиям полей данных в data, разделенных ';'.
@@ -24,8 +25,8 @@ from src.core.validator import operation_exception
 class response_csv(abstract_response):
 
     # Сформировать CSV
-    def create(self, format: str, data: list):
-        text = super().create(format, data)
+    def create(self, data: list):
+        text = super().create(response_format.csv_format(), data)
 
         # Шапка
         item = data[0]

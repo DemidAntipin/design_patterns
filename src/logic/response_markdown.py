@@ -1,6 +1,7 @@
 from src.core.abstract_response import abstract_response
 from src.core.common import common
 from src.core.validator import operation_exception
+from src.core.response_format import response_format
 
 # Форматирование ответа в markdown
 # Первая строка ответа соответствует заголовкам - названиям полей данных в data, разделенных '|'.
@@ -26,8 +27,8 @@ from src.core.validator import operation_exception
 class response_markdown(abstract_response):
 
     # Сформировать MARKDOWN
-    def create(self, format:str, data: list):
-        text = super().create(format, data)
+    def create(self, data: list):
+        text = super().create(response_format.markdown_format(), data)
 
         header = "|"
 
