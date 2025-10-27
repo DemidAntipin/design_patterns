@@ -25,7 +25,7 @@ class test_logics(unittest.TestCase):
         data.append( entity_group )
 
         # Дейстие
-        result = response.create("csv", data)
+        result = response.create(data)
 
         # Проверка
         assert result is not None
@@ -48,10 +48,10 @@ class test_logics(unittest.TestCase):
         data.append(nomenclature)
 
         # Действие
-        result_recipe = response.create("csv", data[:1])
-        result_measure = response.create("csv", data[1:2])
-        result_group = response.create("csv", data[2:3])
-        result_nomenclature = response.create("csv", data[3:4])
+        result_recipe = response.create(data[:1])
+        result_measure = response.create(data[1:2])
+        result_group = response.create(data[2:3])
+        result_nomenclature = response.create(data[3:4])
 
         # Проверка
         assert result_recipe is not None
@@ -77,10 +77,10 @@ class test_logics(unittest.TestCase):
         data.append(nomenclature)
 
         # Действие
-        result_recipe = response.create("markdown", data[:1])
-        result_measure = response.create("markdown", data[1:2])
-        result_group = response.create("markdown", data[2:3])
-        result_nomenclature = response.create("markdown", data[3:4])
+        result_recipe = response.create(data[:1])
+        result_measure = response.create(data[1:2])
+        result_group = response.create(data[2:3])
+        result_nomenclature = response.create(data[3:4])
 
         # Проверка
         assert result_recipe is not None
@@ -106,10 +106,10 @@ class test_logics(unittest.TestCase):
         data.append(nomenclature)
 
         # Действие
-        result_recipe = response.create("json", data[:1])
-        result_measure = response.create("json", data[1:2])
-        result_group = response.create("json", data[2:3])
-        result_nomenclature = response.create("json", data[3:4])
+        result_recipe = response.create(data[:1])
+        result_measure = response.create(data[1:2])
+        result_group = response.create(data[2:3])
+        result_nomenclature = response.create(data[3:4])
 
         # Проверка
         assert result_recipe is not None
@@ -135,10 +135,10 @@ class test_logics(unittest.TestCase):
         data.append(nomenclature)
 
         # Действие
-        result_recipe = response.create("xml", data[:1])
-        result_measure = response.create("xml", data[1:2])
-        result_group = response.create("xml", data[2:3])
-        result_nomenclature = response.create("xml", data[3:4])
+        result_recipe = response.create(data[:1])
+        result_measure = response.create(data[1:2])
+        result_group = response.create(data[2:3])
+        result_nomenclature = response.create(data[3:4])
 
         # Проверка
         assert result_recipe is not None
@@ -161,7 +161,7 @@ class test_logics(unittest.TestCase):
         assert logic is not None
         instance = logic()
         validator.validate( instance,  abstract_response)
-        text =    instance.create(  response_format.csv_format() , data )
+        text =    instance.create(data )
         assert len(text) > 0
 
     def test_create_default_factory(self):
@@ -179,9 +179,9 @@ class test_logics(unittest.TestCase):
         # Проверка
         assert logic is not None
         instance = logic()
-        text =  instance.create(  response_format.json_format() , data )
+        text =  instance.create( data )
         assert len(text) > 0
-        dict_=json.loads(text)
+        dict_=json.loads(text)[0]
         assert "name" in dict_.keys()
         assert "unique_code" in dict_.keys()
         assert dict_['name'] == "test"
@@ -199,7 +199,7 @@ class test_logics(unittest.TestCase):
         data.append(group)
 
         # Действие
-        result_group = response.create("json", data)
+        result_group = response.create(data)
 
         # Проверка
         assert result_group is not None
@@ -224,4 +224,4 @@ class test_logics(unittest.TestCase):
 
         # Проверки
         with self.assertRaises(operation_exception):
-            response.create("csv", data)
+            response.create(data)
