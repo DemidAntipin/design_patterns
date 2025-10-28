@@ -18,5 +18,5 @@ class reference_converter(abstract_coverter):
             if isinstance(value, abstact_reference):
                 result[property] = self.convert(value)
             else:
-                result[property] = factory.create(value).convert(value)
+                result[property] = factory.convert(value)
         return result

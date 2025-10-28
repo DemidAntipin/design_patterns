@@ -53,4 +53,4 @@ class response_json(abstract_response):
 
         factory = factory_converters()
 
-        return json.dumps(factory.create(data).convert(data), ensure_ascii=False)
+        return json.dumps(factory.convert(data), ensure_ascii=False)

@@ -7,8 +7,6 @@ from src.reposity import reposity
 from src.logic.basic_converter import basic_converter
 from src.logic.datetime_converter import datetime_converter
 from src.logic.reference_converter import reference_converter
-from src.logic.list_converter import list_converter
-from src.logic.dict_converter import dict_converter
 
 class test_converter_factory(unittest.TestCase):
     
@@ -21,14 +19,14 @@ class test_converter_factory(unittest.TestCase):
 
         group = service.data[reposity.nomenclature_group_key()][0]
         
-        values = [1, datetime.datetime.now(), group, [1,2,3], {"name":"name", "code":245}]
-        excepted_types = [basic_converter, datetime_converter, reference_converter, list_converter, dict_converter]
+        values = [1, datetime.datetime.now(), group]
+        excepted_results = [basic_converter().convert(1), datetime_converter().convert(datetime.datetime.now()), reference_converter().convert(group)]
     
         # Действие
 
         # Проверки
         for i, v in enumerate(values):
-            assert isinstance(factory.create(v), excepted_types[i])
+            assert factory.convert(v) == excepted_results[i]
 
     def test_convert_undefined_type_factory_converter(self):
         # Подготовка
@@ -40,5 +38,40 @@ class test_converter_factory(unittest.TestCase):
 
         # Проверки
         with self.assertRaises(argument_exception):
-            factory.create(SomeClass())
-    
+            factory.convert(SomeClass())
+
+    def test_convert_array_factory_converter(self):
+        # Подготовка
+        factory = factory_converters()
+
+        service = start_service()
+        service.start()
+
+        group = service.data[reposity.nomenclature_group_key()][0]
+
+        values = [[1, 5, 9], datetime.datetime.now(), group]
+        excepted_result = [[1, 5, 9], datetime_converter().convert(datetime.datetime.now()), reference_converter().convert(group)]
+
+        # Действие
+        result = factory.convert(values)
+
+        # Проверки
+        assert result == excepted_result
+
+    def test_convert_dict_factory_converter(self):
+        # Подготовка
+        factory = factory_converters()
+
+        service = start_service()
+        service.start()
+
+        group = service.data[reposity.nomenclature_group_key()][0]
+
+        values = {"numbers": [1, 2, 3], "datetime": datetime.datetime.now(), "group": group}
+        excepted_result = {"numbers": [1, 2, 3], "datetime": datetime_converter().convert(datetime.datetime.now()), "group": reference_converter().convert(group)}
+
+        # Действие
+        result = factory.convert(values)
+
+        # Проверки
+        assert result == excepted_result  

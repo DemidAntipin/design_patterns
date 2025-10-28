@@ -1,28 +1,37 @@
-from datetime import datetime
 from src.core.abstract_reference import abstact_reference
-from src.core.abstract_converter import abstract_coverter
 from src.logic.basic_converter import basic_converter
 from src.logic.datetime_converter import datetime_converter
 from src.logic.reference_converter import reference_converter
-from src.logic.list_converter import list_converter
-from src.logic.dict_converter import dict_converter
 from src.core.validator import argument_exception
+from src.core.converter_format import converter_format
+from types import NoneType
+from datetime import datetime
 
-"""Класс-фабрика для конвертации любых объектов и списков в JSON-формат"""
 class factory_converters:
-    def create(self, obj) -> abstract_coverter:
-        if isinstance(obj, (int, float, bool, str)) or obj is None:
-            return basic_converter()
-        elif isinstance(obj, datetime):
-            return datetime_converter()
-        elif isinstance(obj, abstact_reference):
-            return reference_converter()
-        elif isinstance(obj, (list, tuple)):
-            return list_converter()
-        elif isinstance(obj, dict):
-            return dict_converter()
-        else:
-            raise argument_exception(f"The method to serialize {type(obj)} is't defined.")
-        
+    __match = {
+        converter_format.basic_format():  basic_converter,
+        converter_format.datetime_format(): datetime_converter,
+        converter_format.reference_format(): reference_converter
+    }
+
+    # Использовать нужный конвертер
     def convert(self, obj):
-        return self.create(obj).convert(obj)
+        if isinstance(obj, (int, float, bool, str)) or isinstance(obj, NoneType):
+            return self.__match[converter_format.basic_format()]().convert(obj)
+        elif isinstance(obj, datetime):
+            return self.__match[converter_format.datetime_format()]().convert(obj)
+        elif isinstance(obj, abstact_reference):
+            return self.__match[converter_format.reference_format()]().convert(obj)
+        elif isinstance(obj, (list, tuple)):
+            result = []
+            for value in obj:
+                result.append(self.convert(value))
+            return result
+        elif isinstance(obj, dict):
+            result = {}
+            for key in obj.keys():
+                value = obj[key]
+                result[key] = self.convert(value)
+            return result
+        else:
+            raise argument_exception(f"The converter that able to serialize {type(obj)} is't defined.")

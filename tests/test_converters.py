@@ -2,8 +2,6 @@ import unittest
 from src.logic.basic_converter import basic_converter
 from src.logic.datetime_converter import datetime_converter
 from src.logic.reference_converter import reference_converter
-from src.logic.list_converter import list_converter
-from src.logic.dict_converter import dict_converter
 from src.start_service import start_service
 from src.reposity import reposity
 from src.core.validator import validator, argument_exception
@@ -138,111 +136,5 @@ class test_converters(unittest.TestCase):
             with self.assertRaises(argument_exception):
                 converter.convert(value)
 
-    def test_convert_valid_types_list_converter(self):
-        # Подготовка
-        converter = list_converter()
-
-        service = start_service()
-        service.start()
-
-        group = service.data[reposity.nomenclature_group_key()][0]
-
-        values = [[0, 1, 2], [True, False, True], [group, group]]
-        expected_value = [[0, 1, 2], [True, False, True], [{"name":group.name, "unique_code":group.unique_code}, {"name":group.name, "unique_code":group.unique_code}]]
-
-        # Действие
-        result = converter.convert(values)
-
-        # Проверки
-        assert result == expected_value
-
-    def test_convert_invalid_types_list_converter(self):
-        # Подготовка
-        converter = list_converter()
-
-        service = start_service()
-        service.start()
-
-        measure = service.data[reposity.measure_key()][0]
-        nomenclature = service.data[reposity.nomenclature_key()][0]
-        group = service.data[reposity.nomenclature_group_key()][0]
-        recipe = service.data[reposity.recipe_key()][0]
-        invalid_values = [1, "2", "three", True, 4.5, None, datetime.datetime.now()]
-
-        # Действие
-
-        # Проверки
-        for value in invalid_values:
-            with self.assertRaises(argument_exception):
-                converter.convert(value)
-        with self.assertRaises(argument_exception):
-            converter.convert({"field":"value"})
-        with self.assertRaises(argument_exception):
-            converter.convert(measure)
-        with self.assertRaises(argument_exception):
-            converter.convert(nomenclature)
-        with self.assertRaises(argument_exception):
-            converter.convert(group)
-        with self.assertRaises(argument_exception):
-            converter.convert(recipe)
-
-    def test_convert_list_of_different_types_list_converter(self):
-        # Подготовка
-        converter = list_converter()
-
-        value = [5, False, None, dict()]
-
-        # Действие
-
-        # Проверки
-        with self.assertRaises(argument_exception):
-            converter.convert(value)
-
-    def test_convert_valid_types_dict_converter(self):
-        # Подготовка
-        converter = dict_converter()
-        format = "%Y-%m-%d %H:%M:%S"
-
-        service = start_service()
-        service.start()
-        group = service.data[reposity.nomenclature_group_key()][0]
-
-        value = {"int": 5, "datetime": datetime.datetime.now(), "reference": group}
-
-        expected_value = {"int": 5, "datetime": datetime.datetime.now().strftime(format), "reference": {"name":group.name, "unique_code":group.unique_code}}
-
-        # Действие
-        result = converter.convert(value)
-
-        # Проверки
-        assert result == expected_value
-
-    def test_convert_invalid_types_dict_converter(self):
-        # Подготовка
-        converter = dict_converter()
-
-        service = start_service()
-        service.start()
-
-        measure = service.data[reposity.measure_key()][0]
-        nomenclature = service.data[reposity.nomenclature_key()][0]
-        group = service.data[reposity.nomenclature_group_key()][0]
-        invalid_values = [1, "2", "three", True, 4.5, None, datetime.datetime.now()]
-        
-        # Действие
-
-        # Проверки
-        for value in invalid_values:
-            with self.assertRaises(argument_exception):
-                converter.convert(value)
-        with self.assertRaises(argument_exception):
-            converter.convert(measure)
-        with self.assertRaises(argument_exception):
-            converter.convert(nomenclature)
-        with self.assertRaises(argument_exception):
-            converter.convert(group)
-        with self.assertRaises(argument_exception):
-            converter.convert(invalid_values)
-    
 if __name__ == "__main__":
     unittest.main()

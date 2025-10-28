@@ -1,3 +1,5 @@
+from types import NoneType
+
 """
 Исключение при проверки аргумента
 """   
@@ -34,7 +36,7 @@ class validator:
         """
 
         if value is None:
-            if allow_null:
+            if allow_null or (isinstance(type_, (list, tuple)) and NoneType in type_) or (isinstance(type_, NoneType)):
                 return True
             else:
                 raise argument_exception("Пустой аргумент")

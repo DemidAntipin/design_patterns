@@ -72,14 +72,14 @@ def build_response():
 @app.route("/api/recipes/get_recipes", methods=['GET'])
 def get_recipes():
     recipes = service.data[reposity.recipe_key()]
-    result = factory_converter.create(recipes).convert(recipes)
+    result = factory_converter.convert(recipes)
     return Response(json.dumps(result, ensure_ascii=False), content_type="application/json; charset=utf-8")
 
 """Получить представление конкретного рецепта по его id в Json формате"""
 @app.route("/api/recipes/get_recipe/<id>", methods=['GET'])
 def get_recipe(id: str):
     recipe = next(filter(lambda r: r.unique_code == id, service.data[reposity.recipe_key()]), None)
-    result = factory_converter.create(recipe).convert(recipe)
+    result = factory_converter.convert(recipe)
     if result:
         return Response(json.dumps(result, ensure_ascii=False), content_type="application/json; charset=utf-8")
     else:
