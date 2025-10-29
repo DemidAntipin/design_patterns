@@ -184,7 +184,7 @@ class test_logics(unittest.TestCase):
         dict_=json.loads(text)[0]
         assert "name" in dict_.keys()
         assert "unique_code" in dict_.keys()
-        assert dict_['name'] == "test"
+        assert dict_['name'] == {"value":"test"}
 
     def test_create_response_from_array(self):
         # Подготовка

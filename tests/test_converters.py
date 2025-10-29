@@ -18,7 +18,7 @@ class test_converters(unittest.TestCase):
 
         # Проверки
         for v in values:
-            assert v == converter.convert(v)
+            assert {"value" :v} == converter.convert(v)
 
     def test_convert_invalid_types_basic_converter(self):
         # Подготовка
@@ -62,7 +62,7 @@ class test_converters(unittest.TestCase):
         result = converter.convert(value)
 
         # Проверки
-        assert result == value.strftime(format)
+        assert result == {"value" :value.strftime(format)}
 
     def test_convert_invalid_types_datetime_converter(self):
         # Подготовка
@@ -109,9 +109,9 @@ class test_converters(unittest.TestCase):
         nomenclature = service.data[reposity.nomenclature_key()][0]
         group = service.data[reposity.nomenclature_group_key()][0]
         
-        expected_measure = {"name":measure.name, "base_unit":measure.base_unit, "coef":measure.coef, "unique_code":measure.unique_code}
-        expected_group = {"name":group.name, "unique_code":group.unique_code}
-        expected_nomenclature = {"name":nomenclature.name, "nomenclature_group":expected_group, "measure_unit":expected_measure, "unique_code":nomenclature.unique_code}
+        expected_measure = {"name": {"value": measure.name}, "base_unit": {"value":measure.base_unit}, "coef": {"value":measure.coef}, "unique_code": {"value":measure.unique_code}}
+        expected_group = {"name": {"value":group.name}, "unique_code": {"value":group.unique_code}}
+        expected_nomenclature = {"name": {"value":nomenclature.name}, "nomenclature_group":expected_group, "measure_unit":expected_measure, "unique_code": {"value":nomenclature.unique_code}}
 
         # Действие
         result_measure = converter.convert(measure)

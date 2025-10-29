@@ -12,4 +12,4 @@ class datetime_converter(abstract_coverter):
     # Дата преобразуется в строку согласно указанному формату
     def convert(self, obj) -> dict:
         validator.validate(obj, datetime)        
-        return obj.strftime(datetime_converter.format)
+        return {"value" : obj.strftime(datetime_converter.format)}

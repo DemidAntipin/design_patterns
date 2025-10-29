@@ -50,12 +50,13 @@ class test_converter_factory(unittest.TestCase):
         group = service.data[reposity.nomenclature_group_key()][0]
 
         values = [[1, 5, 9], datetime.datetime.now(), group]
-        excepted_result = [[1, 5, 9], datetime_converter().convert(datetime.datetime.now()), reference_converter().convert(group)]
+        excepted_result = [[{"value":1}, {"value":5}, {"value":9}], datetime_converter().convert(datetime.datetime.now()), reference_converter().convert(group)]
 
         # Действие
         result = factory.convert(values)
 
         # Проверки
+        print(result, excepted_result)
         assert result == excepted_result
 
     def test_convert_dict_factory_converter(self):
@@ -68,7 +69,7 @@ class test_converter_factory(unittest.TestCase):
         group = service.data[reposity.nomenclature_group_key()][0]
 
         values = {"numbers": [1, 2, 3], "datetime": datetime.datetime.now(), "group": group}
-        excepted_result = {"numbers": [1, 2, 3], "datetime": datetime_converter().convert(datetime.datetime.now()), "group": reference_converter().convert(group)}
+        excepted_result = {"numbers": [{"value":1}, {"value":2}, {"value":3}], "datetime": datetime_converter().convert(datetime.datetime.now()), "group": reference_converter().convert(group)}
 
         # Действие
         result = factory.convert(values)

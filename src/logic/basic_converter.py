@@ -9,4 +9,4 @@ class basic_converter(abstract_coverter):
     """Простые типы не изменяются при сериализации"""
     def convert(self, obj) -> dict:
         validator.validate(obj, (int, float, str, bool, NoneType))
-        return obj
+        return {"value" : obj }
