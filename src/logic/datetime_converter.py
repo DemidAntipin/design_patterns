@@ -10,6 +10,7 @@ class datetime_converter(abstract_coverter):
     format = "%Y-%m-%d %H:%M:%S"
 
     # Дата преобразуется в строку согласно указанному формату
-    def convert(self, obj) -> dict:
+    # field - наименование поля (передается из reference_converter -> factory_converter -> basic_converter)
+    def convert(self, obj, field: str = "value") -> dict:
         validator.validate(obj, datetime)        
-        return {"value" : obj.strftime(datetime_converter.format)}
+        return {field : obj.strftime(datetime_converter.format)}

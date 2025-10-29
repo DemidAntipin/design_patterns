@@ -7,6 +7,7 @@ from types import NoneType
 class basic_converter(abstract_coverter):
 
     """Простые типы не изменяются при сериализации"""
-    def convert(self, obj) -> dict:
+    # field - наименование поля (передается из reference_converter -> factory_converter -> basic_converter)
+    def convert(self, obj, field: str = "value") -> dict:
         validator.validate(obj, (int, float, str, bool, NoneType))
-        return {"value" : obj }
+        return {field : obj}

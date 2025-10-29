@@ -18,19 +18,25 @@ class factory_converters:
     }
 
     # Использовать нужный конвертер
-    def convert(self, obj):
+    # field - наименование поля (передается из reference_converter -> factory_converter)
+    # obj - сериализуемый объект
+    def convert(self, obj, field: str = "value"):
         if isinstance(obj, (list, tuple)):
-            result = []
+            result = {field : []}
             for value in obj:
-                result.append(self.convert(value))
+                # Нет информации о наименовании элемента списка, оставим имя по умолчанию.
+                result[field].append(self.convert(value))
             return result
         elif isinstance(obj, dict):
             result = {}
             for key in obj.keys():
                 value = obj[key]
-                result[key] = self.convert(value)
+                if isinstance(value, abstact_reference):
+                    result[key] = (self.convert(value))
+                else:
+                    result.update(self.convert(value, key))
             return result
         for key in tuple(self.__match.keys()):
             if isinstance(obj, key):
-                return self.__match[key].convert(obj)
+                return self.__match[key].convert(obj, field)
         raise argument_exception(f"The converter that able to serialize {type(obj)} is't defined.")
