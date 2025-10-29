@@ -36,7 +36,7 @@ class validator:
         """
 
         if value is None:
-            if allow_null or (isinstance(type_, (list, tuple)) and NoneType in type_) or (type_ is NoneType)):
+            if allow_null or (isinstance(type_, (list, tuple)) and NoneType in type_) or (type_ is NoneType):
                 return True
             else:
                 raise argument_exception("Пустой аргумент")
