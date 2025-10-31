@@ -7,7 +7,7 @@ from datetime import datetime
 """
 class datetime_converter(abstract_coverter):
     # Формат даты
-    format = "%Y-%m-%d %H:%M:%S"
+    format = "%Y-%m-%d"
 
     # Дата преобразуется в строку согласно указанному формату
     # field - наименование поля (передается из reference_converter -> factory_converter -> basic_converter)

@@ -61,6 +61,27 @@ class measure_model(entity_model):
         item = measure_model(name, coef, inner_base)
         return item
     
+    # перевод value к базовым ед. измерения
+    def to_base_unit_value(self, value: int):
+        if self.base_unit is None:
+            return value * self.coef
+        else:
+            return self.coef * self.base_unit.to_base_unit_value(value)
+        
+    # перевод value из базовых ед. измерения
+    def from_base_unit_value(self, value: float):
+        if self.base_unit is None:
+            return value / self.coef
+        else:
+            return self.base_unit.from_base_unit_value(value) / self.coef
+
+    # Получить базовую единицу измерения
+    def get_base_unit(self) -> 'measure_model':
+        if self.base_unit is None:
+            return self
+        else:
+            return self.base_unit.get_base_unit()
+
     """
     Фабричный метод из Dto
     """

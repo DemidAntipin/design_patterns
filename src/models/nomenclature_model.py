@@ -11,10 +11,10 @@ class nomeclature_model(entity_model):
     # Полное наименование номенклатуры (255)
     __name: str = ""
     # группа номенклатуры
-    __nomenclature_group: nomenclature_group_model = None
+    __category: nomenclature_group_model = None
 
     # единица измерения
-    __measure_unit: measure_model = None
+    __measure: measure_model = None
 
     # Полное название номенклатуры
     @property
@@ -28,34 +28,34 @@ class nomeclature_model(entity_model):
 
     # Текущая группа номенклатуры
     @property
-    def nomenclature_group(self):
-        return self.__nomenclature_group
+    def category(self):
+        return self.__category
     
-    @nomenclature_group.setter
-    def nomenclature_group(self, value: nomenclature_group_model):
+    @category.setter
+    def category(self, value: nomenclature_group_model):
         validator.validate(value, nomenclature_group_model)
-        self.__nomenclature_group = value 
+        self.__category = value 
 
     # Текущая единица измерения
     @property
-    def measure_unit(self):
-        return self.__measure_unit
+    def measure(self):
+        return self.__measure
     
-    @measure_unit.setter
-    def measure_unit(self, value: measure_model):
+    @measure.setter
+    def measure(self, value: measure_model):
         validator.validate(value, measure_model)
-        self.__measure_unit = value
+        self.__measure = value
 
     # Универсальный метод - фабричный.
     @staticmethod
-    def create(name: str, group: nomenclature_group_model, measure_unit: measure_model):
+    def create(name: str, group: nomenclature_group_model, measure: measure_model):
         validator.validate(name, str, 255)
         validator.validate(group, nomenclature_group_model)
-        validator.validate(measure_unit, measure_model)
+        validator.validate(measure, measure_model)
         item = nomeclature_model()
         item.name = name
-        item.nomenclature_group=group
-        item.measure_unit=measure_unit
+        item.category=group
+        item.measure=measure
         return item
     
     """

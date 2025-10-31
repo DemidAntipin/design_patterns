@@ -56,7 +56,7 @@ class test_converters(unittest.TestCase):
         # Подготовка
         converter = datetime_converter()
         value = datetime.datetime.now()
-        format = "%Y-%m-%d %H:%M:%S"
+        format = "%Y-%m-%d"
 
         # Действие
         result = converter.convert(value)
@@ -121,8 +121,8 @@ class test_converters(unittest.TestCase):
             }
         expected_nomenclature = {
             "name": nomenclature.name, 
-            "nomenclature_group":expected_group, 
-            "measure_unit":expected_measure, 
+            "category":expected_group, 
+            "measure":expected_measure, 
             "unique_code":nomenclature.unique_code
             }
 
@@ -140,7 +140,7 @@ class test_converters(unittest.TestCase):
         # Подготовка
         converter = reference_converter()
 
-        invalid_values = [1, "2", "three", True, 4.5, None, datetime.datetime.now()]
+        invalid_values = [1, "2", "three", True, 4.5, None, datetime.datetime.now().date()]
 
         # Действие
 
