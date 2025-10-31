@@ -9,6 +9,7 @@
     },
     "default_recipe":
     {
+        "id": "294d2ed7311648c593712bd1ee26db65",
         "name":"Картофельная запеканка с грибами",
         "categories":[
             {
@@ -62,19 +63,19 @@
                 "id":"3ce75449-05e8-4921-9310-9bcd0be7095b"
             },
             {
-                 "name":"Помидоры",
+                "name":"Помидоры",
                 "measure_id":"f8346e8b-7260-4db8-a673-c8c826ab08b7",
                 "category_id":"7f4ecdab-0f01-4216-8b72-4c91d22b8918",
                 "id":"fc389d90-2c41-4495-8d04-56d75acff008"
             },
             {
-                 "name":"Майонез",
+                "name":"Майонез",
                 "measure_id":"adb7510f-687d-428f-a697-26e53d3f65b7",
                 "category_id":"7f4ecdab-0f01-4216-8b72-4c91d22b8918",
                 "id":"fc389d90-2c41-4495-8d04-56d75acff009"
             },
             {
-                 "name":"Сыр(тертый)",
+                "name":"Сыр(тертый)",
                 "measure_id":"adb7510f-687d-428f-a697-26e53d3f65b7",
                 "category_id":"7f4ecdab-0f01-4216-8b72-4c91d22b8918",
                 "id":"fc389d90-2c41-4495-8d04-56d75acff00a"
@@ -119,6 +120,101 @@
                 "Порежьте помидоры кружочками и разложите по запеканке.", 
                 "Обильно посыпать запеканку сверху тертым сыром.", 
                 "Поставьте запеканку в предварительно разогретую духовку до 200°C. Выпекать 60 минут, после чего дайте запеканке остыть. В горячем виде запеканка разваливается на части."
-            ]
-    }
+            ],
+        "storages":[
+            {
+                "name":"Склад_1",
+                "id":"7f4ecdab-0f01-4216-8b72-530684076367"
+            },
+            {
+                "name":"Склад_2",
+                "id":"7f4ecdab-0f01-4216-8b72-64efc2468ab2"
+            }
+        ],
+        "outcome_transactions" : [
+            {
+                "date": "2024-01-14",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367", 
+                "nomenclature_id": "0c101a7e-5934-4155-83a6-d2c388fcc11a", 
+                "measure_id": "a33dd457-36a8-4de6-b5f1-40afa6193346",  
+                "value": 100,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226935"
+            },
+            {
+                "date": "2024-01-15",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367", 
+                "nomenclature_id": "39d9349d-28fa-4c7b-ad92-5c5fc7cf93da",  
+                "measure_id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",  
+                "value": 50,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226936"
+            },
+            {
+                "date": "2024-01-16",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",  
+                "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff009",  
+                "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",  
+                "value": 5000,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226937"
+            },
+            {
+                "date": "2024-01-17",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",  
+                "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff00a",  
+                "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",  
+                "value": 3000,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226938"
+            },
+            {
+                "date": "2024-01-18",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",  
+                "nomenclature_id": "de92caf7-731c-44cf-a9f4-31237e6fe707", 
+                "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+                "value": 8000,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226939"
+            }
+        ],
+        "income_transactions" : [
+            {
+                "date": "2024-01-10",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",  
+                "nomenclature_id": "0c101a7e-5934-4155-83a6-d2c388fcc11a",  
+                "measure_id": "a33dd457-36a8-4de6-b5f1-40afa6193346",  
+                "value": 500,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226940"
+            },
+            {
+                "date": "2024-01-10", 
+                "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",  
+                "nomenclature_id": "39d9349d-28fa-4c7b-ad92-5c5fc7cf93da",  
+                "measure_id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",  
+                "value": 200,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226941"
+            },
+            {
+                "date": "2024-01-11",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",  
+                "nomenclature_id": "de92caf7-731c-44cf-a9f4-31237e6fe707",  
+                "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7", 
+                "value": 15000,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226942"
+            },
+            {
+                "date": "2024-01-12",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",  
+                "nomenclature_id": "3ce75449-05e8-4921-9310-9bcd0be7095b",  
+                "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7", 
+                "value": 25000,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d22269343"
+            },
+            {
+                "date": "2024-01-13",
+                "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2", 
+                "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff008",  
+                "measure_id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",  
+                "value": 150,
+                "id":"7f4ecdab-0f01-4216-8b72-4c91d2226944"
+            }
+        ]
+    },
+    "first_start" : true
 }

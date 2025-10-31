@@ -1,5 +1,9 @@
-import connexion
-from flask import request, Response
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import Response, JSONResponse
+import uvicorn
+import datetime
+from typing import List, Optional
+import json
 
 from src.core.response_format import response_format
 from src.logic.factory_entities import factory_entities
@@ -7,9 +11,10 @@ from src.reposity import reposity
 from src.start_service import start_service
 from src.models.settings_model import settings_model
 from src.logic.factory_converters import factory_converters
+from src.core.validator import validator
+from src.core.abstract_dto import object_to_dto
 
-import json
-
+# Инициализация сервиса
 settings_file = "./settings.json"
 service = start_service()
 settings = settings_model()
@@ -17,7 +22,7 @@ settings.response_format = response_format.json_format()
 factory_entity = factory_entities(settings)
 factory_converter = factory_converters()
 
-app = connexion.FlaskApp(__name__)
+app = FastAPI(title="REST API Service")
 
 content_types = {
     response_format.json_format(): 'application/json; charset=utf-8',
@@ -26,65 +31,117 @@ content_types = {
     response_format.markdown_format(): 'text/markdown; charset=utf-8'
 }
 
-"""Проверить доступность REST API"""
-@app.route("/api/status", methods=['GET'])
-def status():
+@app.get("/api/status")
+async def status():
     return {"status": "success"}
 
-"""Типы моделей, доступные для формирования ответов"""
-@app.route("/api/responses/models", methods=['GET'])
-def get_response_models():
+@app.get("/api/responses/models")
+async def get_response_models():
     return [key for key in reposity.keys()]
 
-"""Доступные форматы ответов"""
-@app.route("/api/responses/formats", methods=['GET'])
-def get_response_formats():
+@app.get("/api/responses/formats")
+async def get_response_formats():
     return [format for format in response_format.keys()]
 
-"""Сформировать ответ для моделей (model) в переданном формате (format)"""
-@app.route("/api/responses/build", methods=['GET'])
-def build_response():
-    format = request.args.get('format')
-    if format is None:
-        return {"error": "param 'format' must be transmitted"}
+@app.get("/api/ocb/{storage_id}/{start_date}/{end_date}")
+async def ocb(start_date: str,end_date: str,storage_id: str):
+    try:
+        start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+        validator.validate_id(storage_id, [value for value in service.data[reposity.storage_key()]])
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    result = []
+    income_all_transactions = filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.income_transaction_key()])
+    outcome_all_transactions = filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.outcome_transaction_key()])
+    
+    for nomenclature in service.data[reposity.nomenclature_key()]:
+        init_value = 0
+        income = 0
+        outcome = 0
+        income_transactions = sorted([transaction for transaction in income_all_transactions if transaction.nomenclature == nomenclature and transaction.date <= end_date], key=lambda x: x.date)
+        outcome_transactions = sorted([transaction for transaction in outcome_all_transactions if transaction.nomenclature == nomenclature and transaction.date <= end_date], key=lambda x: x.date)
+        
+        measure = nomenclature.measure_unit.get_base_unit()
+        
+        # предполагается, что транзакции могут быть в любой единице измерения, но все они сводятся к 1 базовой - measure
+        for transaction in income_transactions:
+            if transaction.date < start_date:
+                init_value += transaction.measure.to_base_unit_value(transaction.value)
+            else:
+                income += transaction.measure.to_base_unit_value(transaction.value)
+                
+        for transaction in outcome_transactions:
+            if transaction.date < start_date:
+                init_value -= transaction.measure.to_base_unit_value(transaction.value)
+            else:
+                outcome += transaction.measure.to_base_unit_value(transaction.value)
+                
+        end_value = init_value + income - outcome
+        item = {
+            "start_value": init_value,
+            "nomenclature": nomenclature,
+            "measure": measure,
+            "income": income,
+            "outcome": outcome,
+            "end_value": end_value
+        }
+        result.append(item)
+        
+    if result:
+        converted_result = factory_converter.convert(result)
+        return JSONResponse(content=object_to_dto(converted_result), media_type="application/json; charset=utf-8")
+    else:
+        raise HTTPException(status_code=404, detail="No data found")
+
+@app.post("/api/save")
+async def save_data():
+    result = factory_converter.convert(service.data)
+    filename = "saved_data.json"
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)
+    return {"status": "SUCCESS"}
+
+@app.get("/api/responses/build")
+async def build_response(
+    format: str = Query(..., description="Формат ответа"),
+    model_type: str = Query(..., description="Тип модели")
+):
     format = format.lower()
-    if format not in get_response_formats():
-        return {
-            "error": f"not such format '{format}'. Available: "
-                    f"{get_response_formats()}"
-        }
-    content_type = content_types.get(format)
-    model_type = request.args.get('model')
-    if model_type is None:
-        return {"error": "param 'model' must be transmitted"}
-    if model_type not in get_response_models():
-        return {
-            "error": f"not such model '{model_type}'. "
-                    f"Available: {get_response_models()}"
-        }
+    if format not in response_format.keys():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Format '{format}' not supported. Available: {list(response_format.keys())}"
+        )
+    
+    if model_type not in reposity.keys():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model '{model_type}' not found. Available: {list(reposity.keys())}"
+        )
 
     models = service.data[model_type]
-    result = factory_entity.create(format)().create(format, models)
+    result = factory_entity.create(format)().create(models)
+    content_type = content_types.get(format, 'application/json; charset=utf-8')
 
-    return Response(result, content_type=content_type)
+    return Response(content=result, media_type=content_type)
 
-"""Получить представление всего списка рецептов в Json формате"""
-@app.route("/api/recipes/get_recipes", methods=['GET'])
-def get_recipes():
+@app.get("/api/recipes/get_recipes")
+async def get_recipes():
     recipes = service.data[reposity.recipe_key()]
     result = factory_converter.convert(recipes)
-    return Response(json.dumps(result, ensure_ascii=False), content_type="application/json; charset=utf-8")
+    return JSONResponse(content=result, media_type="application/json; charset=utf-8")
 
-"""Получить представление конкретного рецепта по его id в Json формате"""
-@app.route("/api/recipes/get_recipe/<id>", methods=['GET'])
-def get_recipe(id: str):
+@app.get("/api/recipes/get_recipe/{id}")
+async def get_recipe(id: str):
     recipe = next(filter(lambda r: r.unique_code == id, service.data[reposity.recipe_key()]), None)
-    result = factory_converter.convert(recipe)
-    if result:
-        return Response(json.dumps(result, ensure_ascii=False), content_type="application/json; charset=utf-8")
+    if recipe:
+        result = factory_converter.convert(recipe)
+        return JSONResponse(content=result, media_type="application/json; charset=utf-8")
     else:
-        return Response(status=404)
-    
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
 if __name__ == '__main__':
     service.start(settings_file)
-    app.run(host="127.0.0.1", port = 8080)
+    uvicorn.run(app, host="127.0.0.1", port=8080)

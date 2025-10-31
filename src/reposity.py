@@ -27,6 +27,20 @@ class reposity:
     def recipe_key():
         return "recipe_model"
     
+    # ключ для складов
+    @staticmethod
+    def storage_key():
+        return "storage_model"
+
+    # ключи для транзакций
+    @staticmethod
+    def income_transaction_key():
+        return "income_transaction_model"
+
+    @staticmethod
+    def outcome_transaction_key():
+        return "outcome_transaction_model"
+
     """
     Получить список всех ключей
     """

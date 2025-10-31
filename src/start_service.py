@@ -5,14 +5,21 @@ from src.models.nomenclature_model import nomeclature_model
 from src.models.nomenclature_group_model import nomenclature_group_model
 from src.models.ingredient_model import ingredient_model
 from src.dtos.nomenclature_dto import nomenclature_dto
+from src.dtos.ingredient_dto import ingredient_dto
 from src.dtos.measure_dto import measure_dto
 from src.dtos.category_dto import category_dto
 from src.core.validator import validator, argument_exception, operation_exception
+from src.models.storage_model import storage_model
+from src.models.transaction_model import transaction_model
+from src.dtos.transaction_dto import transaction_dto
 import os
 import json
 
 class start_service():
     __repo:reposity = reposity()
+
+    # Первый запуск
+    __first_start = True
 
     # Словарь который содержит загруженные и инициализованные инстансы нужных объектов
     # Ключ - id записи, значение - abstract_model
@@ -53,11 +60,17 @@ class start_service():
             with open( self.__full_file_name, 'r', encoding="utf-8") as file_instance:
                 settings = json.load(file_instance)
 
-                if "default_recipe" in settings.keys():
-                    data = settings["default_recipe"]
-                    return self.convert(data)
+                if "first_start" in settings.keys():
+                    self.__first_start = settings["first_start"]
 
-            return False
+                if self.__first_start:
+                    self.__first_start = False
+                    if "default_recipe" in settings.keys():
+                        data = settings["default_recipe"]
+                        return self.convert(data)
+                    return False
+                else:
+                    return True
         except Exception as e:
             error_message = str(e)
             raise Exception(error_message)
@@ -110,6 +123,46 @@ class start_service():
             self.__save_item( reposity.nomenclature_key(), dto, item )
 
         return True        
+    
+
+    def __convert_storages(   self, data: dict) -> bool:
+        validator.validate(data, dict)      
+        storages = data['storages'] if 'storages' in data else []   
+        if len(storages) == 0:
+            return False
+         
+        for storage in storages:
+            dto = category_dto().create(storage)
+            item = storage_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.storage_key(), dto, item )
+
+        return True
+
+    def __convert_income_transactions(   self, data: dict) -> bool:
+        validator.validate(data, dict)      
+        transactions = data['income_transactions'] if 'income_transactions' in data else []   
+        if len(transactions) == 0:
+            return False
+         
+        for transaction in transactions:
+            dto = transaction_dto().create(transaction)
+            item = transaction_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.income_transaction_key(), dto, item )
+
+        return True     
+
+    def __convert_expense_transactions(   self, data: dict) -> bool:
+        validator.validate(data, dict)      
+        transactions = data['outcome_transactions'] if 'outcome_transactions' in data else []   
+        if len(transactions) == 0:
+            return False
+         
+        for transaction in transactions:
+            dto = transaction_dto().create(transaction)
+            item = transaction_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.outcome_transaction_key(), dto, item )
+
+        return True    
 
 
     # Обработать полученный словарь    
@@ -129,23 +182,24 @@ class start_service():
 
         self.__convert_measures(data)
         self.__convert_groups(data)
-        self.__convert_nomenclatures(data)        
+        self.__convert_nomenclatures(data)
+        self.__convert_storages(data)   
+        self.__convert_income_transactions(data)
+        self.__convert_expense_transactions(data)   
 
 
         # Собираем рецепт
         compositions =  data['composition'] if 'composition' in data else []
         ingredients_list = []
         for composition in compositions:
-            namnomenclature_id = composition['nomenclature_id'] if 'nomenclature_id' in composition else ""
-            value  = composition['value'] if 'value' in composition else ""
-            nomenclature = self.__cache[namnomenclature_id] if namnomenclature_id in self.__cache else None
-            item = ingredient_model.create(nomenclature, value)
+            dto = ingredient_dto().create(composition)
+            item = ingredient_model.from_dto(dto, self.__cache)
             ingredients_list.append(item)
         self.__default_recipe.ingredients = ingredients_list
-            
+
+        self.__default_recipe.unique_code = data["id"]    
         # Сохраняем рецепт
         self.__repo.data[ reposity.recipe_key()].append(self.__default_recipe)
-
         return True
 
     """

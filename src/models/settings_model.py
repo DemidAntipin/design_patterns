@@ -6,6 +6,7 @@ from src.core.validator import validator
 class settings_model():
     __company:company_model = None
     __response_format:str = None
+    __datetime_format: str = "%Y-%m-%d"
 
     # Текущая организация
     @property
