@@ -1,3 +1,5 @@
+from types import NoneType
+
 """
 Исключение при проверки аргумента
 """   
@@ -32,9 +34,8 @@ class validator:
         Returns:
             True или Exception
         """
-
         if value is None:
-            if allow_null:
+            if allow_null or (isinstance(type_, (list, tuple)) and NoneType in type_) or (type_ is NoneType):
                 return True
             else:
                 raise argument_exception("Пустой аргумент")
@@ -51,3 +52,21 @@ class validator:
             raise argument_exception("Некорректная длина аргумента")
 
         return True
+    
+    @staticmethod
+    def validate_id(value, array):
+        """
+            Валидация наличия элемента в array с id = значению аргумента
+        Args:
+            value (str): Аргумент
+            array (list):
+        Raises:
+            argument_exception: Элемент не существует
+        Returns:
+            True или Exception
+        """
+        available_values = [item.unique_code for item in array]
+        if value in available_values:
+            return True
+        else:
+            raise argument_exception(f"Элемент с id {value} не существует")

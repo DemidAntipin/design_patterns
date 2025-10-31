@@ -6,7 +6,7 @@ from src.core.validator import validator
 Общий класс для наследования. Содержит стандартное определение: код, наименование
 """
 class entity_model(abstact_reference):
-    __name:str = ""
+    __name:str = None
 
     # Наименование
     @property

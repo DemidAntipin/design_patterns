@@ -1,6 +1,8 @@
 from src.core.abstract_response import abstract_response
 from src.core.common import common
 from src.core.validator import operation_exception
+from src.logic.factory_converters import factory_converters
+from src.core.response_format import response_format
 import json
 
 # Форматирование ответа в json
@@ -46,27 +48,9 @@ import json
 class response_json(abstract_response):
     
     # Сформировать JSON
-    def create(self, format: str, data: list):
-        text = super().create(format, data)
+    def create(self, data: list):
+        text = super().create(response_format.json_format(), data)
 
-        def format_value(value):
-            if hasattr(value, 'unique_code'):
-               return json.loads(self.create(format, [value]))
-            elif isinstance(value, (list, tuple)):
-                return [format_value(x) for x in value]
-            else:
-                return str(value)
+        factory = factory_converters()
 
-        text = []
-        for item in data:
-            item_dict = {}
-            fields = common.get_fields(item)
-            for field in fields:
-                value = getattr(item, field)
-                item_dict[field] = format_value(value)
-            text.append(json.dumps(item_dict, ensure_ascii=False))
-        
-        if len(text)>1:
-            return "["+','.join(text)+"]"
-        else:
-            return text[0]
+        return json.dumps(factory.convert(data), ensure_ascii=False)

@@ -181,7 +181,7 @@ class test_logics(unittest.TestCase):
         instance = logic()
         text =  instance.create( data )
         assert len(text) > 0
-        dict_=json.loads(text)[0]
+        dict_=json.loads(text)["value"][0]
         assert "name" in dict_.keys()
         assert "unique_code" in dict_.keys()
         assert dict_['name'] == "test"
@@ -203,7 +203,7 @@ class test_logics(unittest.TestCase):
 
         # Проверка
         assert result_group is not None
-        result_group = json.loads(result_group)
+        result_group = json.loads(result_group)["value"]
         assert isinstance(result_group, list)
         assert len(result_group)==2
         assert "name" in result_group[0].keys()

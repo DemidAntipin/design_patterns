@@ -1,6 +1,7 @@
 from src.core.entity_model import entity_model
 from src.models.nomenclature_model import nomeclature_model
 from src.core.validator import validator
+from src.dtos.ingredient_dto import ingredient_dto
 
 # Модель элемента рецепта
 class ingredient_model(entity_model):
@@ -31,4 +32,14 @@ class ingredient_model(entity_model):
         item.__nomenclature = nomenclature
         item.__value = value
         item.name = item.nomenclature.name
+        return item
+    
+    """
+    Фабричный метод из Dto
+    """
+    def from_dto(dto:ingredient_dto, cache:dict):
+        validator.validate(dto, ingredient_dto)
+        validator.validate(cache, dict)
+        nomenclature =  cache[ dto.nomenclature_id ] if dto.nomenclature_id in cache else None
+        item  = ingredient_model.create(nomenclature, dto.value)
         return item

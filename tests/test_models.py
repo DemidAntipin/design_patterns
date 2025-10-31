@@ -20,7 +20,7 @@ class test_models(unittest.TestCase):
         # действие
 
         # проверки
-        assert model.name == ""
+        assert model.name == None
         assert model.inn == 0
         assert model.account == 0
         assert model.corr_account == 0
@@ -330,8 +330,8 @@ class test_models(unittest.TestCase):
 
         # Проверки
         assert nomeclature.name == ""
-        assert nomeclature.measure_unit is None
-        assert nomeclature.nomenclature_group is None
+        assert nomeclature.measure is None
+        assert nomeclature.category is None
 
     # Проверить создание номенклатуры
     # Данные с ошибками
@@ -347,9 +347,9 @@ class test_models(unittest.TestCase):
         with self.assertRaises(argument_exception):
             nomeclature.name = "A" * 256
         with self.assertRaises(argument_exception):
-            nomeclature.nomenclature_group = 512
+            nomeclature.category = 512
         with self.assertRaises(argument_exception):
-            nomeclature.measure_unit = tuple()
+            nomeclature.measure = tuple()
         
     # Проверить создание номенклатуры
     # Данные должны быть не пустые
@@ -365,10 +365,10 @@ class test_models(unittest.TestCase):
 
         # проверки
         assert nomeclature.name == "A" * 255
-        assert nomeclature.measure_unit.name == "грамм"
-        assert nomeclature.measure_unit.coef == 1
-        assert nomeclature.measure_unit.base_unit is None
-        assert isinstance(nomeclature.nomenclature_group, nomenclature_group_model)
+        assert nomeclature.measure.name == "грамм"
+        assert nomeclature.measure.coef == 1
+        assert nomeclature.measure.base_unit is None
+        assert isinstance(nomeclature.category, nomenclature_group_model)
 
     # Проверить создание рецепта
     # Данные должны быть пустые
@@ -379,7 +379,7 @@ class test_models(unittest.TestCase):
         # действие
 
         # проверки
-        assert recipe.name == ""
+        assert recipe.name is None
         assert isinstance(recipe.ingredients, list)
         assert len(recipe.ingredients) == 0
         assert isinstance(recipe.description, list)

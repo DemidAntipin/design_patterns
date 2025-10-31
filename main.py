@@ -6,12 +6,16 @@ from src.logic.factory_entities import factory_entities
 from src.reposity import reposity
 from src.start_service import start_service
 from src.models.settings_model import settings_model
+from src.logic.factory_converters import factory_converters
+
+import json
 
 settings_file = "./settings.json"
 service = start_service()
 settings = settings_model()
 settings.response_format = response_format.json_format()
-factory = factory_entities(settings)
+factory_entity = factory_entities(settings)
+factory_converter = factory_converters()
 
 app = connexion.FlaskApp(__name__)
 
@@ -60,11 +64,27 @@ def build_response():
         }
 
     models = service.data[model_type]
-    result = factory.create(format)().create(format, models)
+    result = factory_entity.create(format)().create(format, models)
 
     return Response(result, content_type=content_type)
 
+"""Получить представление всего списка рецептов в Json формате"""
+@app.route("/api/recipes/get_recipes", methods=['GET'])
+def get_recipes():
+    recipes = service.data[reposity.recipe_key()]
+    result = factory_converter.convert(recipes)
+    return Response(json.dumps(result, ensure_ascii=False), content_type="application/json; charset=utf-8")
 
+"""Получить представление конкретного рецепта по его id в Json формате"""
+@app.route("/api/recipes/get_recipe/<id>", methods=['GET'])
+def get_recipe(id: str):
+    recipe = next(filter(lambda r: r.unique_code == id, service.data[reposity.recipe_key()]), None)
+    result = factory_converter.convert(recipe)
+    if result:
+        return Response(json.dumps(result, ensure_ascii=False), content_type="application/json; charset=utf-8")
+    else:
+        return Response(status=404)
+    
 if __name__ == '__main__':
     service.start(settings_file)
     app.run(host="127.0.0.1", port = 8080)

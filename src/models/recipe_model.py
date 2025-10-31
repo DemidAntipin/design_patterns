@@ -2,6 +2,8 @@ from src.core.validator import validator
 from src.models.nomenclature_model import nomeclature_model
 from src.core.entity_model import entity_model
 from src.models.ingredient_model import ingredient_model
+from src.dtos.recipe_dto import recipe_dto
+from src.dtos.ingredient_dto import ingredient_dto
 
 # модель рецепта
 class recipe_model(entity_model):
@@ -45,3 +47,16 @@ class recipe_model(entity_model):
         for step in algorithm:
             validator.validate(step, str)
             self.description.append(step)
+
+    # Фабричный метод
+    def from_dto(dto:recipe_dto, cache:dict):
+        validator.validate(dto, recipe_dto)
+        validator.validate(cache, dict)
+        item = recipe_model.create(dto.name)
+        for ingredient in dto.ingredients:
+            ing_dto = ingredient_dto().create(ingredient)
+            ing = ingredient_model.from_dto(ing_dto, cache)
+            item.ingredients.append(ing)
+        for step in dto.description:
+            item.description.append(step)
+        return item
