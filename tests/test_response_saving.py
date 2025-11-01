@@ -20,8 +20,7 @@ class test_response_results_saving(unittest.TestCase):
         super().__init__(methodName)
         self.__start_service.start(self.__settings_name)
 
-    # Автотест, создающий файлы и сохраняющий в них результаты ответов для
-    # разных моделей
+    # Автотест, создающий файлы и сохраняющий в них результаты ответов для разных моделей
     def test_save_results_in_files(self):
         # Создание директории со всеми файлами
         dir_ = pathlib.Path(self.__save_directory)

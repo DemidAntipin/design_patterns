@@ -1,4 +1,5 @@
 from types import NoneType
+from datetime import datetime
 
 """
 Исключение при проверки аргумента
@@ -70,3 +71,16 @@ class validator:
             return True
         else:
             raise argument_exception(f"Элемент с id {value} не существует")
+        
+    @staticmethod
+    def validate_period(start_date:str, end_date:str):
+        try:
+            validator.validate(start_date, str)
+            validator.validate(end_date, str)
+            start_date = datetime.strptime(start_date, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError:
+            raise argument_exception("Дата должна быть строкой в формате yyyy-mm-dd")
+        if start_date > end_date:
+            raise argument_exception(f"start_date не может быть позжё end_date")
+        return (start_date, end_date)
