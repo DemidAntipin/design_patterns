@@ -45,17 +45,12 @@ async def get_response_formats():
 
 @app.get("/api/ocb/{storage_id}/{start_date}/{end_date}")
 async def ocb(start_date: str,end_date: str,storage_id: str):
-    try:
-        start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-        validator.validate_id(storage_id, [value for value in service.data[reposity.storage_key()]])
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    start_date, end_date = validator.validate_period(start_date, end_date)
+    validator.validate_id(storage_id, [value for value in service.data[reposity.storage_key()]])
     
     result = []
-    income_all_transactions = filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.income_transaction_key()])
-    outcome_all_transactions = filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.outcome_transaction_key()])
-    
+    income_all_transactions = list(filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.income_transaction_key()]))
+    outcome_all_transactions = list(filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.outcome_transaction_key()]))
     for nomenclature in service.data[reposity.nomenclature_key()]:
         init_value = 0
         income = 0
@@ -63,7 +58,7 @@ async def ocb(start_date: str,end_date: str,storage_id: str):
         income_transactions = sorted([transaction for transaction in income_all_transactions if transaction.nomenclature == nomenclature and transaction.date <= end_date], key=lambda x: x.date)
         outcome_transactions = sorted([transaction for transaction in outcome_all_transactions if transaction.nomenclature == nomenclature and transaction.date <= end_date], key=lambda x: x.date)
         
-        measure = nomenclature.measure_unit.get_base_unit()
+        measure = nomenclature.measure.get_base_unit()
         
         # предполагается, что транзакции могут быть в любой единице измерения, но все они сводятся к 1 базовой - measure
         for transaction in income_transactions:

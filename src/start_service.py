@@ -50,6 +50,24 @@ class start_service():
             self.__full_file_name = full_file_name.strip()
         else:
             raise argument_exception(f'Не найден файл настроек {full_file_name}')
+        
+    @property
+    def repo(self) -> reposity:
+        return self.__repo
+    
+    @repo.setter
+    def repo(self, repo:reposity):
+        validator.validate(repo, reposity)
+        self.__repo = repo
+        
+    @property
+    def first_start(self) -> bool:
+        return self.__first_start
+    
+    @first_start.setter
+    def first_start(self, value:bool):
+        validator.validate(value, bool)
+        self.__first_start = value
 
     # Загрузить настройки из Json файла
     def load(self) -> bool:
@@ -61,10 +79,10 @@ class start_service():
                 settings = json.load(file_instance)
 
                 if "first_start" in settings.keys():
-                    self.__first_start = settings["first_start"]
+                    self.first_start = settings["first_start"]
 
-                if self.__first_start:
-                    self.__first_start = False
+                if self.first_start:
+                    self.first_start = False
                     if "default_recipe" in settings.keys():
                         data = settings["default_recipe"]
                         return self.convert(data)

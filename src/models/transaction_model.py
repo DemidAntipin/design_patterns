@@ -9,24 +9,15 @@ from datetime import datetime
 # Модель единиц измерения для моделей номенклатуры
 class transaction_model(entity_model):
     # Дата транзакции
-    __date : datetime
+    __date : datetime = None
     # Склад транзакции
-    __storage : storage_model
+    __storage : storage_model = None
     # Номенклатура транзакции
-    __nomenclature: nomeclature_model
+    __nomenclature: nomeclature_model = None
     # Ед измерения транзакции
-    __measure: measure_model
+    __measure: measure_model = None
     # Количество
-    __value : int
-
-    def __init__(self, date: datetime, storage: storage_model, nomenclature: nomeclature_model, measure: measure_model, value: int):
-        super().__init__()
-        
-        self.date = date
-        self.storage = storage
-        self.nomenclature = nomenclature
-        self.measure = measure
-        self.value = value
+    __value : int = None
 
     # Дата транзакции
     @property
@@ -87,7 +78,12 @@ class transaction_model(entity_model):
         validator.validate(measure, measure_model)
         validator.validate(value, int)
         
-        item = transaction_model(date, storage, nomenclature, measure, value)
+        item = transaction_model()
+        item.date = date
+        item.value = value
+        item.measure = measure
+        item.nomenclature = nomenclature
+        item.storage = storage
         return item
     
     """Фабричный метод для создания из DTO"""

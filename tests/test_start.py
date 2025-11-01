@@ -49,3 +49,32 @@ class test_start(unittest.TestCase):
 
         # Действие
         repo.initalize() 
+
+    # Проверить First_start
+    def test_first_start_start_service(self):
+        # Подготовка
+        service = start_service()
+        service.repo = reposity()
+        service.first_start = True
+        service.repo.initalize()
+
+        # Действие
+
+        # Проверки
+        assert service.first_start == True
+        service.start()
+        assert service.first_start == False
+
+    # Проверить пропуск загрузки данных, если запуск не первый
+    def test_skip_data_load_start_service(self):
+        # Подготовка
+        service = start_service()
+        service.repo = reposity()
+        service.repo.initalize()
+
+        # Действие
+        service.start(file="tests/data/not_first_start.json")
+
+        # Проверки
+        for key in service.data.keys():
+            assert service.data[key] == []

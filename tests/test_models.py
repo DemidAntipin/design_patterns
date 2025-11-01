@@ -5,9 +5,13 @@ from src.models.nomenclature_model import nomeclature_model
 from src.models.measure_model import measure_model
 from src.models.storage_model import storage_model
 from src.models.ingredient_model import ingredient_model
+from src.models.transaction_model import transaction_model
 from src.core.validator import validator, argument_exception, operation_exception
 from src.core.abstract_reference import abstact_reference
 from src.models.recipe_model import recipe_model
+from src.start_service import start_service
+from src.reposity import reposity
+from datetime import datetime
 import uuid
 import unittest
 
@@ -405,6 +409,72 @@ class test_models(unittest.TestCase):
         assert recipe.ingredients[0]==ingredient
         assert "Печь до готовности" in recipe.description
 
+    # Проверить создание транзакции
+    # Данные должны быть пустые
+    def test_create_empty_transaction_model(self):
+        # Подготовка
+        transaction = transaction_model()
+
+        # Действие
+
+        # Проверки
+        assert isinstance(transaction, transaction_model)
+        assert transaction.name is None
+        assert transaction.measure is None
+        assert transaction.nomenclature is None
+        assert transaction.storage is None
+        assert transaction.date is None
+        assert transaction.value is None
+
+    # Проверить создание транзакции
+    # Данные должны быть не пустые
+    def test_create_not_empty_transaction_model(self):
+        # Подготовка
+        service = start_service()
+        service.start()
+
+        storage=service.data[reposity.storage_key()][0]
+        nomenclature=service.data[reposity.nomenclature_key()][0]
+        measure=service.data[reposity.measure_key()][0]
+        date = datetime.now()
+
+        # Действие
+        transaction = transaction_model.create(date, storage, nomenclature, measure, 400)
+
+        # Проверки
+        assert isinstance(transaction, transaction_model)
+        assert transaction.date == date
+        assert transaction.storage == storage
+        assert transaction.nomenclature == nomenclature
+        assert transaction.measure == measure
+        assert transaction.value == 400
+    
+    # Проверить создание транзакции
+    # Validator вызывает исключения из-за неверных данных
+    def test_create_invalid_transaction_model(self):
+        # Подготовка
+        service = start_service()
+        service.start()
+
+        storage=service.data[reposity.storage_key()][0]
+        nomenclature=service.data[reposity.nomenclature_key()][0]
+        measure=service.data[reposity.measure_key()][0]
+        date = datetime.now()
+        group=service.data[reposity.nomenclature_group_key()][0]
+
+        # Действие
+
+        # Проверки
+        with self.assertRaises(argument_exception):
+            transaction_model.create("date", storage,nomenclature, measure, 400)
+        with self.assertRaises(argument_exception):
+            transaction_model.create(date, group, nomenclature, measure, 400)
+        with self.assertRaises(argument_exception):
+            transaction_model.create(date, storage, [nomenclature, nomenclature], measure, 400)
+        with self.assertRaises(argument_exception):
+            transaction_model.create(date, storage, nomenclature, None, 400)
+        with self.assertRaises(argument_exception):
+            transaction_model.create(date, storage, nomenclature, measure, "2 кг")
 
 if __name__ == "__main__":
     unittest.main()
