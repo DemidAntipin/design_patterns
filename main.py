@@ -4,6 +4,7 @@ import uvicorn
 import datetime
 from typing import List, Optional
 import json
+import os
 
 from src.core.response_format import response_format
 from src.logic.factory_entities import factory_entities
@@ -13,6 +14,7 @@ from src.models.settings_model import settings_model
 from src.logic.factory_converters import factory_converters
 from src.core.validator import validator
 from src.core.abstract_dto import object_to_dto
+from src.logic.ocb import ocb
 
 # Инициализация сервиса
 settings_file = "./settings.json"
@@ -44,59 +46,22 @@ async def get_response_formats():
     return [format for format in response_format.keys()]
 
 @app.get("/api/ocb/{storage_id}/{start_date}/{end_date}")
-async def ocb(start_date: str,end_date: str,storage_id: str):
-    start_date, end_date = validator.validate_period(start_date, end_date)
-    validator.validate_id(storage_id, [value for value in service.data[reposity.storage_key()]])
-    
-    result = []
-    income_all_transactions = list(filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.income_transaction_key()]))
-    outcome_all_transactions = list(filter(lambda transaction: transaction.storage.unique_code == storage_id, service.data[reposity.outcome_transaction_key()]))
-    for nomenclature in service.data[reposity.nomenclature_key()]:
-        init_value = 0
-        income = 0
-        outcome = 0
-        income_transactions = sorted([transaction for transaction in income_all_transactions if transaction.nomenclature == nomenclature and transaction.date <= end_date], key=lambda x: x.date)
-        outcome_transactions = sorted([transaction for transaction in outcome_all_transactions if transaction.nomenclature == nomenclature and transaction.date <= end_date], key=lambda x: x.date)
-        
-        measure = nomenclature.measure.get_base_unit()
-        
-        # предполагается, что транзакции могут быть в любой единице измерения, но все они сводятся к 1 базовой - measure
-        for transaction in income_transactions:
-            if transaction.date < start_date:
-                init_value += transaction.measure.to_base_unit_value(transaction.value)
-            else:
-                income += transaction.measure.to_base_unit_value(transaction.value)
-                
-        for transaction in outcome_transactions:
-            if transaction.date < start_date:
-                init_value -= transaction.measure.to_base_unit_value(transaction.value)
-            else:
-                outcome += transaction.measure.to_base_unit_value(transaction.value)
-                
-        end_value = init_value + income - outcome
-        item = {
-            "start_value": init_value,
-            "nomenclature": nomenclature,
-            "measure": measure,
-            "income": income,
-            "outcome": outcome,
-            "end_value": end_value
-        }
-        result.append(item)
+async def ocb_(start_date: str,end_date: str,storage_id: str):
+    result = ocb().create(start_date, end_date, storage_id, service)
         
     if result:
         converted_result = factory_converter.convert(result)
         return JSONResponse(content=object_to_dto(converted_result), media_type="application/json; charset=utf-8")
     else:
-        raise HTTPException(status_code=404, detail="No data found")
+        raise HTTPException(status_code=404)
 
-@app.post("/api/save")
-async def save_data():
-    result = factory_converter.convert(service.data)
-    filename = "saved_data.json"
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)
-    return {"status": "SUCCESS"}
+@app.post("/api/save/")
+async def save_data(path:str= Query(..., description="Путь для сохранения файла")):
+    try:
+        service.save_reposity(file_path = path)
+        return {"status": "SUCCESS", "saved_to": os.path.abspath(path)}
+    except Exception as e:
+        return {"status": "ERROR", "error": e}
 
 @app.get("/api/responses/build")
 async def build_response(

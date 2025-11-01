@@ -41,6 +41,7 @@ class test_saving_reposity(unittest.TestCase):
         "recipe_model": (recipe_dto, recipe_model)
     }
 
+    # Метод загрузки объектов определенной модели по dto из файла
     def preload(self, data:dict, model:str):
         data = data[model]
         for item in data:

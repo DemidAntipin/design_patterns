@@ -2,6 +2,9 @@ import unittest
 from src.start_service import start_service
 from src.reposity import reposity
 from src.models.measure_model import measure_model
+import os
+import json
+import tempfile
 
 
 # Набор тестов для проверки работы статового сервиса
@@ -78,3 +81,25 @@ class test_start(unittest.TestCase):
         # Проверки
         for key in service.data.keys():
             assert service.data[key] == []
+
+    # Проверить сохранение данных репозитория
+    # Файл создается и json с ключами, соответствующими reposity.keys()
+    def test_create_file_saving_reposity_start_service(self):
+        # Подготовка
+        service = start_service()
+        service.start()
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_file:
+            file_path = tmp_file.name
+
+        # Действие
+        service.save_reposity(file_path)
+
+        # Проверки
+        assert os.path.exists(file_path)
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        for key in service.data.keys():
+            assert key in data
+        
+        os.remove(file_path)
+        

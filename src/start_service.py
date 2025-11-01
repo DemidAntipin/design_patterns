@@ -12,6 +12,8 @@ from src.core.validator import validator, argument_exception, operation_exceptio
 from src.models.storage_model import storage_model
 from src.models.transaction_model import transaction_model
 from src.dtos.transaction_dto import transaction_dto
+from src.logic.factory_converters import factory_converters
+from src.core.abstract_dto import object_to_dto
 import os
 import json
 
@@ -235,3 +237,14 @@ class start_service():
         result = self.load()
         if result == False:
             raise operation_exception("Невозможно сформировать стартовый набор данных!")
+        
+    """
+    Сохранить репозиторий в файл
+    """
+    def save_reposity(self, file_path: str):
+        validator.validate(file_path, str)
+        abs_path = os.path.abspath(file_path)
+        factory_converter = factory_converters()
+        result = factory_converter.convert(self.data)
+        with open(abs_path, 'w', encoding='utf-8') as file:
+            json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)
