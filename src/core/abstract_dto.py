@@ -1,6 +1,7 @@
 import abc
 from src.core.common import common
 from src.core.validator import validator, operation_exception
+from datetime import datetime
 
 
 """
@@ -40,3 +41,34 @@ class abstact_dto:
             raise   operation_exception("Невозможно загрузить данные!")    
 
         return self
+
+# Превращает сериализованные классы в dto объекты
+# Поправляет название ключей и заменяет вложенные классы на их id
+def object_to_dto(object):
+    if isinstance(object, dict):
+        result = {}
+        for key in object.keys():
+            if isinstance(object[key], dict):
+                if "unique_code" in object[key]:
+                    value = object_to_dto(object[key]["unique_code"])
+                    key+="_id"
+                else:
+                    value=object_to_dto(object[key])
+                result[key]=value
+            elif key == "value" and len(object.keys())==1:
+                # удаление лишнего словаря, берем только значение
+                return object_to_dto(object[key])
+            else:
+                new_key = "id" if key == "unique_code" else key
+                if object[key] is None and key != "name":
+                    new_key += "_id"
+                result[new_key]=object_to_dto(object[key])
+        return result
+    elif isinstance(object, list):
+        result = []
+        for item in object:
+            result.append(object_to_dto(item))
+        return result
+    else:
+        return object
+            

@@ -1,18 +1,17 @@
 from src.core.validator import validator
-from src.core.abstract_reference import abstact_reference
 from src.core.entity_model import entity_model
+from src.core.abstract_dto import abstact_dto
 
 ######################################
 # Модель склада
 class storage_model(entity_model):
-    __name:str = ""
-
-    # Наименование
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value:str):
-        validator.validate(value, str)
-        self.__name = value.strip()
+    
+    """
+    Фабричный метод из Dto
+    """
+    @staticmethod
+    def from_dto(dto:abstact_dto, cache:dict):
+        item  = storage_model()
+        item.name = dto.name
+        item.unique_code = dto.id
+        return item
