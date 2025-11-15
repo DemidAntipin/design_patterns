@@ -36,18 +36,14 @@ class test_ocb(unittest.TestCase):
         service.start()
         storage = service.data[reposity.storage_key()][0]
 
-        filters = filter_sorting_dto([{
-            "field_name": "storage",
-            "value": storage,
-            "format": "=="
-        }], [])
+        filters = filter_sorting_dto([], [])
         expected_fields = {"start_value", "nomenclature", "measure", "income", "outcome", "end_value"}
 
         start_date = datetime(1, 1, 1)
         end_date = datetime(9999, 12, 31)
 
         # Действие
-        report = ocb(service).create(start_date.date(), end_date.date(), filters)
+        report = ocb(service).create(start_date.date(), end_date.date(), storage.unique_code, filters)
 
         # Проверки
         assert isinstance(report, list)

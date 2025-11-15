@@ -48,7 +48,7 @@ async def get_response_formats():
 @app.post("/api/ocb")
 async def ocb_(request: ocb_request):
     filters = filter_sorting_dto(request.filters["filters"], request.filters["sorting"])
-    result = ocb(service).create(request.start_date, request.end_date, filters)
+    result = ocb(service).create(request.start_date, request.end_date, request.storage_id, filters)
         
     if result:
         converted_result = factory_converter.convert(result)

@@ -7,6 +7,7 @@ from src.core.prototype import prototype
 from src.dtos.filter_dto import filter_dto
 from src.dtos.filter_sorting_dto import filter_sorting_dto
 from src.start_service import start_service
+from src.core.filter_format import filter_format
 
 class ocb:
 
@@ -27,18 +28,28 @@ class ocb:
         return value
 
     # Создание отчёта, возвращает список словарей, каждый из которых соответствует 1 строчке таблицы
-    def create(self, start_date, end_date, filter) -> list:
+    def create(self, start_date, end_date, storage_id, filter) -> list:
         validator.validate(filter, (filter_sorting_dto, filter_dto))
         income_transactions = prototype(ocb.service.data[reposity.income_transaction_key()])
         outcome_transactions = prototype(ocb.service.data[reposity.outcome_transaction_key()])
 
+        storage_filter = filter_sorting_dto([{
+            "field_name": "storage",
+            "value": storage_id,
+            "format": filter_format.like()
+        }], [])
+
+        income_transactions = prototype.filter(income_transactions, storage_filter)
+        outcome_transactions = prototype.filter(outcome_transactions, storage_filter)
+
+        # Применение остальных фильтров
         income_transactions = prototype.filter(income_transactions, filter)
         outcome_transactions = prototype.filter(outcome_transactions, filter)
 
         filter_before = filter_sorting_dto([{
             "field_name": "date",
             "value": start_date,
-            "format": "<"
+            "format": filter_format.less()
         }], [])
         before_income_transactions = prototype.filter(income_transactions, filter_before)
         before_outcome_transactions = prototype.filter(outcome_transactions, filter_before)
@@ -46,12 +57,12 @@ class ocb:
             {
                 "field_name": "date",
                 "value": start_date,
-                "format": ">="
+                "format": filter_format.not_less()
             },
             {
                 "field_name": "date",
                 "value": end_date,
-                "format": "<="
+                "format": filter_format.not_greater()
             }], [])
         period_income_transactions = prototype.filter(income_transactions, filter_period)
         period_outcome_transactions = prototype.filter(outcome_transactions, filter_period)
@@ -62,7 +73,7 @@ class ocb:
             filter_nomenclature = filter_sorting_dto([{
                 "field_name": "nomenclature",
                 "value": nomenclature,
-                "format": "=="
+                "format": filter_format.equals()
             }], [])
             start_value = self.calculate(prototype.filter(before_income_transactions, filter_nomenclature).data) - self.calculate(prototype.filter(before_outcome_transactions, filter_nomenclature).data)
             income = self.calculate(prototype.filter(period_income_transactions, filter_nomenclature).data)

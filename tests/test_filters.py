@@ -4,6 +4,7 @@ from src.start_service import start_service
 from src.reposity import reposity
 from src.dtos.filter_sorting_dto import filter_sorting_dto
 from src.models.nomenclature_group_model import nomenclature_group_model
+from src.core.filter_format import filter_format
 
 class test_filters(unittest.TestCase):
 
@@ -67,7 +68,7 @@ class test_filters(unittest.TestCase):
         filters = filter_sorting_dto([{
             "field_name": "name",
             "value": "test1",
-            "format": "=="
+            "format": filter_format.equals()
         }], [])
 
         # Действие
@@ -92,7 +93,7 @@ class test_filters(unittest.TestCase):
         filters = filter_sorting_dto([{
             "field_name": "name",
             "value": "test",
-            "format": "like"
+            "format": filter_format.like()
         }], [])
 
         # Действие
@@ -118,7 +119,7 @@ class test_filters(unittest.TestCase):
         filters = filter_sorting_dto([{
             "field_name": "measure",
             "value": measure,
-            "format": "=="
+            "format": filter_format.equals()
         }], [])
 
         # Действие
@@ -141,7 +142,7 @@ class test_filters(unittest.TestCase):
         filters = filter_sorting_dto([{
             "field_name": "measure",
             "value": measure,
-            "format": "like"
+            "format": filter_format.like()
         }], [])
 
         # Действие
