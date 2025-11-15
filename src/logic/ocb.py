@@ -10,10 +10,10 @@ from src.start_service import start_service
 
 class ocb:
 
-    service = start_service()
+    service: start_service = None
 
-    def __init__(self):
-        self.service.start()
+    def __init__(self, service):
+        ocb.service = service
 
     # Функция подсчёта остатков в базовых единицах
     # Подразумевается что transaction_list содержит отфильтрованный список транзакций
@@ -29,8 +29,8 @@ class ocb:
     # Создание отчёта, возвращает список словарей, каждый из которых соответствует 1 строчке таблицы
     def create(self, start_date, end_date, filter) -> list:
         validator.validate(filter, (filter_sorting_dto, filter_dto))
-        income_transactions = prototype(self.service.data[reposity.income_transaction_key()])
-        outcome_transactions = prototype(self.service.data[reposity.outcome_transaction_key()])
+        income_transactions = prototype(ocb.service.data[reposity.income_transaction_key()])
+        outcome_transactions = prototype(ocb.service.data[reposity.outcome_transaction_key()])
 
         income_transactions = prototype.filter(income_transactions, filter)
         outcome_transactions = prototype.filter(outcome_transactions, filter)
@@ -57,7 +57,7 @@ class ocb:
         period_outcome_transactions = prototype.filter(outcome_transactions, filter_period)
 
         result = []
-        for nomenclature in self.service.data[reposity.nomenclature_key()]:
+        for nomenclature in ocb.service.data[reposity.nomenclature_key()]:
             row = {}
             filter_nomenclature = filter_sorting_dto([{
                 "field_name": "nomenclature",

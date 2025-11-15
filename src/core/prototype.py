@@ -21,7 +21,7 @@ class prototype:
             },
             "operations":{
                 filter_format.equals() : lambda a, b: a == b,
-                filter_format.like(): lambda a, b: a in b,
+                filter_format.like(): lambda a, b: str(a) in b,
                 filter_format.less(): lambda a, b: a < b,
                 filter_format.greater(): lambda a, b: a > b,
                 filter_format.not_less(): lambda a, b: a >= b,
@@ -85,11 +85,13 @@ class prototype:
                 return prototype.__match()["types"][key](value, filter_value, format)
     
     @staticmethod
-    def compare_datetime(value:datetime, filter_value:date, format:filter_format) -> bool:
+    def compare_datetime(value:datetime, filter_value, format:filter_format) -> bool:
         validator.validate(value, datetime)
         available_formats=[filter_format.equals(), filter_format.greater(), filter_format.less(), filter_format.not_greater(), filter_format.not_less()]
         if format not in available_formats:
             raise argument_exception(f"Неподдерживаемый формат сравнения для дат. Доступные форматы {available_formats}, получен {format}.")
+        if not isinstance(filter_value, date):
+            filter_value = datetime.strptime(filter_value, "%Y-%m-%d").date()
         return prototype.__match()["operations"][format](value.date(), filter_value)
     
     @staticmethod
@@ -98,7 +100,7 @@ class prototype:
         available_formats=[filter_format.equals(), filter_format.like()]
         if format not in available_formats:
             raise argument_exception(f"Неподдерживаемый формат сравнения для строк. Доступные форматы {available_formats}, получен {format}.")
-        return prototype.__match()["operations"][format](value, filter_value)
+        return prototype.__match()["operations"][format](filter_value, value)
     
     @staticmethod
     def compare_objects(value, filter_value:abstact_reference, format:filter_format) -> bool:
