@@ -1,9 +1,12 @@
 from abc import ABC
 import uuid
 from src.core.validator import validator
+from functools import total_ordering
 
 
 # Абстрактная модель с полем уникального кода для однозначной идентификации объектов. От AbstractModel наследуются все модели приложения.
+# total_ordering, используя методы __eq__ и __lt__, сгенерирует остальные сравнения автоматически
+@total_ordering
 class abstact_reference(ABC):
     # Уникальный ID модели
     __unique_code:str
@@ -38,5 +41,12 @@ class abstact_reference(ABC):
 
     # Перегрузка штатного варианта сравнения
     def __eq__(self, value: object) -> bool:
-        validator.validate(value, abstact_reference)
+        if not isinstance(value, abstact_reference):
+            return False
         return self.unique_code == value.unique_code
+    
+    # Перегрузка штатного варианта сравнения
+    def __lt__(self, value: object):
+        if not isinstance(value, abstact_reference):
+            return False
+        return self.unique_code < value.unique_code

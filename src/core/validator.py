@@ -79,8 +79,17 @@ class validator:
             validator.validate(end_date, str)
             start_date = datetime.strptime(start_date, "%Y-%m-%d")
             end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        except ValueError:
+        except:
             raise argument_exception("Дата должна быть строкой в формате yyyy-mm-dd")
         if start_date > end_date:
             raise argument_exception(f"start_date не может быть позжё end_date")
         return (start_date, end_date)
+    
+    @staticmethod
+    def validate_datetime_from_str(date:str):
+        validator.validate(date, str)
+        try:
+            date = datetime.strptime(date, "%Y-%m-%d")
+        except:
+            raise argument_exception("Дата должна быть строкой в формате yyyy-mm-dd")
+        return date

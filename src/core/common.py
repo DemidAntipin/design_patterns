@@ -37,7 +37,24 @@ class common:
                 # Флаг. Только простые типы и модели включать
                 if is_common == True and (isinstance(value, dict) or isinstance(value, list) ):
                     continue
-
                 result.append(item)
+
+        return result
+    
+    @staticmethod
+    def get_values(source, recurse: bool = False) -> list:
+        if source is None:
+            raise argument_exception("Некорректно переданы аргументы!")
+        items = list(filter(lambda x: not x.startswith("_") , dir(source))) 
+        result = []
+
+        for item in items:
+            attribute = getattr(source.__class__, item)
+            if isinstance(attribute, property):
+                value = getattr(source, item)
+
+                if recurse and isinstance(value, abstact_reference):
+                    result.extend(common.get_values(value, recurse))
+                result.append(value)
 
         return result
