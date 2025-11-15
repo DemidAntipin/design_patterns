@@ -1,11 +1,11 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import Response, JSONResponse
 import uvicorn
-import datetime
-from typing import List, Optional
+from src.core.requests import ocb_request, filter_request
+from src.core.prototype import prototype
 import json
 import os
-
+from src.dtos.filter_sorting_dto import filter_sorting_dto
 from src.core.response_format import response_format
 from src.logic.factory_entities import factory_entities
 from src.reposity import reposity
@@ -45,15 +45,33 @@ async def get_response_models():
 async def get_response_formats():
     return [format for format in response_format.keys()]
 
-@app.get("/api/ocb/{storage_id}/{start_date}/{end_date}")
-async def ocb_(start_date: str,end_date: str,storage_id: str):
-    result = ocb().create(start_date, end_date, storage_id, service)
+@app.post("/api/ocb")
+async def ocb_(request: ocb_request):
+    filters = filter_sorting_dto(request.filters["filters"], request.filters["sorting"])
+    result = ocb().create(request.start_date, request.end_date, filters)
         
     if result:
         converted_result = factory_converter.convert(result)
         return JSONResponse(content=object_to_dto(converted_result), media_type="application/json; charset=utf-8")
     else:
         raise HTTPException(status_code=404)
+    
+@app.post("/api/data")
+async def filter_data(request: filter_request):
+    if request.model not in reposity.keys():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model '{request.model}' not found. Available: {list(reposity.keys())}"
+        )
+    models = service.data[request.model]
+    filters = filter_sorting_dto(request.filters["filters"], request.filters["sorting"])
+    proto = prototype(models)
+    proto = prototype.filter(proto, filters)
+    factory = factory_converters()
+    result = factory.convert(proto.data)
+    return JSONResponse(content=result, media_type="application/json; charset=utf-8")
+
+
 
 @app.post("/api/save/")
 async def save_data(path:str= Query(..., description="Путь для сохранения файла")):

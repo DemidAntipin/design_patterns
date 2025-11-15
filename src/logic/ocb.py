@@ -3,62 +3,17 @@ from src.start_service import start_service
 from src.reposity import reposity
 from src.models.nomenclature_model import nomeclature_model
 from src.models.transaction_model import transaction_model
-from datetime import datetime
+from src.core.prototype import prototype
+from src.dtos.filter_dto import filter_dto
+from src.dtos.filter_sorting_dto import filter_sorting_dto
+from src.start_service import start_service
 
 class ocb:
-    # Репозиторий данных, копируется из start_service.data
-    __data: dict = None
 
-    @property
-    def data(self) -> dict:
-        return self.__data
+    service = start_service()
 
-    @data.setter
-    def data(self, dict_:dict):
-        validator.validate(dict_, dict)
-        self.__data = dict_
-
-    # Фильтрация транзакций по заданным условиям
-    # Обязательный аргумент:
-    #   end_date - конец расчётного периода
-    # Необязательные аргументы:
-    #   start_date - начало расчётного периода, если не передан - любая дата считается позже начала расчётного периода
-    #   nomenclature - номенклатура, если передан - отбор только тех транзакций, что содержат ту же номенклатуру
-    #   storage_id - id склада, если передан - отбор только тех транзакций, id склада которых соответсвует переданному
-    # Возвращает кортеж отфильтрованных транзакций:
-    #   (список_приходных_транзакций, список_расходных_транзакций)
-    def filter_transactions(self, end_date:datetime, start_date:datetime = None, nomenclature:nomeclature_model = None, storage_id: str = None):
-        validator.validate(end_date, datetime)
-        income_transactions = []
-        for transaction in self.__data["income_transaction_model"]:
-            if start_date:
-                validator.validate(start_date, datetime)
-                if transaction.date < start_date:
-                    continue
-            if transaction.date > end_date:
-                continue
-            if nomenclature and transaction.nomenclature != nomenclature:
-                continue
-            if storage_id and transaction.storage.unique_code != storage_id:
-                continue
-            income_transactions.append(transaction)
-        outcome_transactions = []
-        for transaction in self.__data["outcome_transaction_model"]:
-            if start_date:
-                if transaction.date < start_date:
-                    continue
-            if transaction.date > end_date:
-                continue
-            if nomenclature:
-                validator.validate(nomenclature, nomeclature_model)
-                if transaction.nomenclature != nomenclature:
-                    continue
-            if storage_id:
-                validator.validate(storage_id, str)
-                if transaction.storage.unique_code != storage_id:
-                    continue
-            outcome_transactions.append(transaction)
-        return income_transactions, outcome_transactions
+    def __init__(self):
+        self.service.start()
 
     # Функция подсчёта остатков в базовых единицах
     # Подразумевается что transaction_list содержит отфильтрованный список транзакций
@@ -72,22 +27,46 @@ class ocb:
         return value
 
     # Создание отчёта, возвращает список словарей, каждый из которых соответствует 1 строчке таблицы
-    def create(self, start_date:str, end_date:str, storage_id:str, service: start_service) -> list:
-        start_date, end_date = validator.validate_period(start_date, end_date)
-        validator.validate_id(storage_id, [value for value in service.data[reposity.storage_key()]])
-        self.__data = service.data
-        result = []
+    def create(self, start_date, end_date, filter) -> list:
+        validator.validate(filter, (filter_sorting_dto, filter_dto))
+        income_transactions = prototype(self.service.data[reposity.income_transaction_key()])
+        outcome_transactions = prototype(self.service.data[reposity.outcome_transaction_key()])
 
-        for nomenclature in service.data[reposity.nomenclature_key()]:
+        income_transactions = prototype.filter(income_transactions, filter)
+        outcome_transactions = prototype.filter(outcome_transactions, filter)
+
+        filter_before = filter_sorting_dto([{
+            "field_name": "date",
+            "value": start_date,
+            "format": "<"
+        }], [])
+        before_income_transactions = prototype.filter(income_transactions, filter_before)
+        before_outcome_transactions = prototype.filter(outcome_transactions, filter_before)
+        filter_period = filter_sorting_dto([
+            {
+                "field_name": "date",
+                "value": start_date,
+                "format": ">="
+            },
+            {
+                "field_name": "date",
+                "value": end_date,
+                "format": "<="
+            }], [])
+        period_income_transactions = prototype.filter(income_transactions, filter_period)
+        period_outcome_transactions = prototype.filter(outcome_transactions, filter_period)
+
+        result = []
+        for nomenclature in self.service.data[reposity.nomenclature_key()]:
             row = {}
-            # транзакции в указанном периоде
-            income_transactions, outcome_transactions = self.filter_transactions(start_date=start_date, end_date=end_date, nomenclature=nomenclature, storage_id=storage_id)
-            income = self.calculate(income_transactions)
-            outcome = self.calculate(outcome_transactions)
-            # дополнительно включает транзакции до начала периода
-            income_transactions, outcome_transactions = self.filter_transactions(end_date=end_date, nomenclature=nomenclature, storage_id=storage_id)
-            # транзакции за все время - транзакции в периоде = транзакции до периода
-            start_value = (self.calculate(income_transactions) - income) - (self.calculate(outcome_transactions) - outcome)
+            filter_nomenclature = filter_sorting_dto([{
+                "field_name": "nomenclature",
+                "value": nomenclature,
+                "format": "=="
+            }], [])
+            start_value = self.calculate(prototype.filter(before_income_transactions, filter_nomenclature).data) - self.calculate(prototype.filter(before_outcome_transactions, filter_nomenclature).data)
+            income = self.calculate(prototype.filter(period_income_transactions, filter_nomenclature).data)
+            outcome = self.calculate(prototype.filter(period_outcome_transactions, filter_nomenclature).data)
             row["start_value"]=start_value
             row["nomenclature"]=nomenclature
             row["measure"]=nomenclature.measure.get_base_unit()
