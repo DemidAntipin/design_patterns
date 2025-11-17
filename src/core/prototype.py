@@ -51,7 +51,7 @@ class prototype:
     
     # Универсальный фильтр
     @staticmethod
-    def filter(source: "prototype", filter) -> list:
+    def filter(source: "prototype", filter) -> "prototype":
         data = source.data
         if len(data) == 0:
             return source.clone(data)
