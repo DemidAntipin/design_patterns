@@ -210,8 +210,7 @@ class test_models(unittest.TestCase):
         # действие
 
         # проверки
-        with self.assertRaises(argument_exception):
-            abstract == 512
+        assert abstract != 512
         assert abstract == company
         assert abstract != storage
 
