@@ -6,7 +6,7 @@ from src.core.abstract_reference import abstact_reference
 import uuid
 
 ######################################
-# Модель номенклатуры
+# Модель остатков
 class rest_model(abstact_reference):
     # номенклатура
     __nomenclature: nomeclature_model = None
