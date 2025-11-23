@@ -80,7 +80,7 @@ class test_start(unittest.TestCase):
 
         # Проверки
         for key in service.data.keys():
-            assert service.data[key] == []
+            assert len(service.data[key]) == 0
 
     # Проверить сохранение данных репозитория
     # Файл создается и json с ключами, соответствующими reposity.keys()

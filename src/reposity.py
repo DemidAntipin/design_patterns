@@ -67,3 +67,4 @@ class reposity:
         keys = reposity.keys()
         for key in keys:
             self.__data[ key ] = []
+        self.__data[self.rest_key()] = {}

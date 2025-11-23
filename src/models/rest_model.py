@@ -67,5 +67,5 @@ class rest_model(abstact_reference):
         validator.validate(cache, dict)
         range =  cache[ dto.measure_id ] if dto.measure_id in cache else None
         nomenclature =  cache[ dto.nomenclature_id] if dto.nomenclature_id in cache else None
-        item  = rest_model.create(nomenclature, range, dto.rest)
+        item  = rest_model.create(nomenclature, range, dto.value)
         return item

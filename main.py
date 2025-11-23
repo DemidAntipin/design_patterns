@@ -95,7 +95,7 @@ async def filter_data(request: filter_request):
 
 
 
-@app.post("/api/save/")
+@app.post("/api/save")
 async def save_data(path:str= Query(..., description="Путь для сохранения файла")):
     try:
         service.save_reposity(file_path = path)

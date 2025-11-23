@@ -264,6 +264,11 @@ class start_service():
         validator.validate(file_path, str)
         abs_path = os.path.abspath(file_path)
         factory_converter = factory_converters()
+        save = self.data[reposity.rest_key()]
+        self.data[reposity.rest_key()] = list(self.data[reposity.rest_key()].values())
         result = factory_converter.convert(self.data)
+        result["block_date"] = datetime.strftime(self.block_date, self.__settings.datetime_format)
+        result["first_start"] = self.first_start
+        self.data[reposity.rest_key()] = save
         with open(abs_path, 'w', encoding='utf-8') as file:
             json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)

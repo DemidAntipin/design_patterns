@@ -3,7 +3,7 @@ from src.core.abstract_dto import abstact_dto
 class rest_dto(abstact_dto):
     __measure_id:str = ""
     __nomenclature_id:str = ""
-    __rest: float = 0
+    __value: float = 0
 
     @property
     def measure_id(self) -> str:
@@ -22,9 +22,9 @@ class rest_dto(abstact_dto):
         self.__nomenclature_id = value
 
     @property
-    def rest(self) -> float:
-        return self.__rest
+    def value(self) -> float:
+        return self.__value
 
-    @rest.setter
-    def rest(self, value):
-        self.__rest = value
+    @value.setter
+    def value(self, value):
+        self.__value = value

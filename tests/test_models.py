@@ -177,7 +177,7 @@ class test_models(unittest.TestCase):
         not_empty_abstract.name = "test"
 
         # проверки
-        assert empty_abstract.name == ""
+        assert empty_abstract.name is None
         assert validator.validate(empty_abstract.unique_code, str)
         assert not_empty_abstract.name == "test"
         assert validator.validate(not_empty_abstract.unique_code, str)
