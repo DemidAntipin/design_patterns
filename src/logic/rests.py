@@ -89,8 +89,9 @@ class rests:
             # получить сохраненный остаток
             rest_value = rests.service.data[reposity.rest_key()][nomenclature.unique_code].value if nomenclature.unique_code in rests.service.data[reposity.rest_key()] else 0
             # подсчёт текущего остатка = сохраненный остаток + остаток активного периода
-            value = rest_value + self.calculate(prototype.filter(period_income_transactions, filter_nomenclature).data, prototype.filter(period_outcome_transactions, filter_nomenclature).data)
+            value = rest_value + nomenclature.measure.from_base_unit_value(self.calculate(prototype.filter(period_income_transactions, filter_nomenclature).data, prototype.filter(period_outcome_transactions, filter_nomenclature).data))
             row["nomenclature"]=factory_converters().convert(nomenclature)
+            row["measure"]=factory_converters().convert(nomenclature.measure)
             row["value"] = value
             result.append(row)
         return result
