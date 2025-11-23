@@ -14,6 +14,8 @@ from src.models.transaction_model import transaction_model
 from src.dtos.transaction_dto import transaction_dto
 from src.logic.factory_converters import factory_converters
 from src.core.abstract_dto import object_to_dto
+from src.models.settings_model import settings_model
+from datetime import datetime
 import os
 import json
 
@@ -27,11 +29,14 @@ class start_service():
     # Ключ - id записи, значение - abstract_model
     __cache = {}
 
+    __settings: settings_model = None
+
     # Наименование файла (полный путь)
     __full_file_name:str = ""
 
     def __init__(self):
         self.__repo.initalize()
+        self.__settings = settings_model()
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
@@ -56,7 +61,7 @@ class start_service():
     @property
     def repo(self) -> reposity:
         return self.__repo
-    
+
     @repo.setter
     def repo(self, repo:reposity):
         validator.validate(repo, reposity)
@@ -71,6 +76,15 @@ class start_service():
         validator.validate(value, bool)
         self.__first_start = value
 
+    @property
+    def block_date(self) -> datetime:
+        return self.__settings.block_date
+    
+    @block_date.setter
+    def block_date(self, value:datetime):
+        validator.validate(value, datetime)
+        self.__settings.block_date = value
+
     # Загрузить настройки из Json файла
     def load(self) -> bool:
         if self.__full_file_name == "":
@@ -79,6 +93,11 @@ class start_service():
         try:
             with open( self.__full_file_name, 'r', encoding="utf-8") as file_instance:
                 settings = json.load(file_instance)
+
+                if "block_date" in settings.keys():
+                    self.__settings.block_date = datetime.strptime(settings["block_date"], self.__settings.datetime_format)
+                else:
+                    return False
 
                 if "first_start" in settings.keys():
                     self.first_start = settings["first_start"]

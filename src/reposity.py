@@ -40,6 +40,10 @@ class reposity:
     @staticmethod
     def outcome_transaction_key():
         return "outcome_transaction_model"
+    
+    @staticmethod
+    def rest_key():
+        return "rest_model"
 
     """
     Получить список всех ключей
@@ -63,3 +67,4 @@ class reposity:
         keys = reposity.keys()
         for key in keys:
             self.__data[ key ] = []
+        self.__data["rest_model"] = []

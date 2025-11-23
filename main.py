@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import Response, JSONResponse
 import uvicorn
-from src.core.requests import ocb_request, filter_request
+from src.core.requests import ocb_request, filter_request, block_date_request
 from src.core.prototype import prototype
 import json
 import os
@@ -15,6 +15,8 @@ from src.logic.factory_converters import factory_converters
 from src.core.validator import validator
 from src.core.abstract_dto import object_to_dto
 from src.logic.ocb import ocb
+from src.logic.rests import rests
+from datetime import datetime
 
 # Инициализация сервиса
 settings_file = "./settings.json"
@@ -44,6 +46,26 @@ async def get_response_models():
 @app.get("/api/responses/formats")
 async def get_response_formats():
     return [format for format in response_format.keys()]
+
+@app.get("/api/block_date/current")
+async def get_current_block_date():
+    result = {"block_date": datetime.strftime(service.block_date, "%Y-%m-%d")}
+    return JSONResponse(content=result, media_type="application/json; charset=utf-8")
+
+@app.get("/api/block_date/rests/{date_str}")
+async def get_rests_at_date(date_str: str):
+    date = validator.validate_datetime_from_str(date_str)
+    result = rests().show_rests(date)
+    return JSONResponse(content=object_to_dto(result), media_type="application/json; charset=utf-8")
+
+@app.post("/api/block_date/update")
+async def update_block_date(request: block_date_request):
+    try:
+        rests().update_block_date(request.new_block_date)
+        result = {"status": "success", "new_block_date": datetime.strftime(request.new_block_date, "%Y-%m-%d")}
+        return JSONResponse(content=result, media_type="application/json; charset=utf-8")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/ocb")
 async def ocb_(request: ocb_request):
