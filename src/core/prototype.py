@@ -91,8 +91,8 @@ class prototype:
         if format not in available_formats:
             raise argument_exception(f"Неподдерживаемый формат сравнения для дат. Доступные форматы {available_formats}, получен {format}.")
         if not isinstance(filter_value, date):
-            filter_value = datetime.strptime(filter_value, "%Y-%m-%d").date()
-        return prototype.__match()["operations"][format](value.date(), filter_value)
+            filter_value = datetime.strptime(filter_value, "%Y-%m-%d")
+        return prototype.__match()["operations"][format](value, filter_value)
     
     @staticmethod
     def compare_str(value:str, filter_value:str, format:filter_format) -> bool:

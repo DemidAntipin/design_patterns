@@ -30,3 +30,5 @@ class filter_dto(abstact_dto):
     @format.setter
     def format(self, value: str):
         self.__format = value
+
+    

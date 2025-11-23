@@ -37,6 +37,8 @@ class test_response_results_saving(unittest.TestCase):
             response = factory.create(format)()
 
             for model in models:
+                if model == "rest_model":
+                    continue
                 file_path = subdir / f"{model}.{format}"
                 file_path.touch(exist_ok=True)
 

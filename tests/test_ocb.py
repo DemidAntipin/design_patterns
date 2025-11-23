@@ -43,7 +43,7 @@ class test_ocb(unittest.TestCase):
         end_date = datetime(9999, 12, 31)
 
         # Действие
-        report = ocb(service).create(start_date.date(), end_date.date(), storage.unique_code, filters)
+        report = ocb(service).create(start_date, end_date, storage.unique_code, filters)
 
         # Проверки
         assert isinstance(report, list)

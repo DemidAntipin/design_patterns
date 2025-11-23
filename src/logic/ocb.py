@@ -33,11 +33,7 @@ class ocb:
         income_transactions = prototype(ocb.service.data[reposity.income_transaction_key()])
         outcome_transactions = prototype(ocb.service.data[reposity.outcome_transaction_key()])
 
-        storage_filter = filter_sorting_dto([{
-            "field_name": "storage",
-            "value": storage_id,
-            "format": filter_format.like()
-        }], [])
+        storage_filter = filter_sorting_dto.create_by_storage(storage_id)
 
         income_transactions = prototype.filter(income_transactions, storage_filter)
         outcome_transactions = prototype.filter(outcome_transactions, storage_filter)
@@ -46,35 +42,17 @@ class ocb:
         income_transactions = prototype.filter(income_transactions, filter)
         outcome_transactions = prototype.filter(outcome_transactions, filter)
 
-        filter_before = filter_sorting_dto([{
-            "field_name": "date",
-            "value": start_date,
-            "format": filter_format.less()
-        }], [])
+        filter_before = filter_sorting_dto.create_by_before_date(start_date)
         before_income_transactions = prototype.filter(income_transactions, filter_before)
         before_outcome_transactions = prototype.filter(outcome_transactions, filter_before)
-        filter_period = filter_sorting_dto([
-            {
-                "field_name": "date",
-                "value": start_date,
-                "format": filter_format.not_less()
-            },
-            {
-                "field_name": "date",
-                "value": end_date,
-                "format": filter_format.not_greater()
-            }], [])
+        filter_period = filter_sorting_dto.create_by_period_date(start_date, end_date)
         period_income_transactions = prototype.filter(income_transactions, filter_period)
         period_outcome_transactions = prototype.filter(outcome_transactions, filter_period)
 
         result = []
         for nomenclature in ocb.service.data[reposity.nomenclature_key()]:
             row = {}
-            filter_nomenclature = filter_sorting_dto([{
-                "field_name": "nomenclature",
-                "value": nomenclature,
-                "format": filter_format.equals()
-            }], [])
+            filter_nomenclature = filter_sorting_dto.create_by_nomenclature(nomenclature)
             start_value = self.calculate(prototype.filter(before_income_transactions, filter_nomenclature).data) - self.calculate(prototype.filter(before_outcome_transactions, filter_nomenclature).data)
             income = self.calculate(prototype.filter(period_income_transactions, filter_nomenclature).data)
             outcome = self.calculate(prototype.filter(period_outcome_transactions, filter_nomenclature).data)
