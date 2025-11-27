@@ -16,6 +16,10 @@ from src.models.nomenclature_model import nomeclature_model
 from src.models.recipe_model import recipe_model
 from src.models.storage_model import storage_model
 from src.models.transaction_model import transaction_model
+from src.models.rest_model import rest_model
+from src.dtos.rest_dto import rest_dto
+from src.logic.rests import rests
+from datetime import datetime
 
 class test_saving_reposity(unittest.TestCase):
     # Путь до файла с тестовыми настройками
@@ -38,7 +42,8 @@ class test_saving_reposity(unittest.TestCase):
         "storage_model":(storage_dto, storage_model),
         "income_transaction_model": (transaction_dto, transaction_model),
         "outcome_transaction_model": (transaction_dto, transaction_model),
-        "recipe_model": (recipe_dto, recipe_model)
+        "recipe_model": (recipe_dto, recipe_model),
+        "rest_model": (rest_dto, rest_model)
     }
 
     # Метод загрузки объектов определенной модели по dto из файла
@@ -57,6 +62,7 @@ class test_saving_reposity(unittest.TestCase):
         for key in self.__match.keys():
             self.__repo[key] = []
         self.__start_service.start(self.__settings_name)
+        rests().update_block_date(self.__start_service.block_date)
 
     # Проверка единиц измерения
     def test_save_measures(self):
@@ -182,6 +188,32 @@ class test_saving_reposity(unittest.TestCase):
             model.unique_code = dto.id
             assert model in self.__start_service.data[reposity.outcome_transaction_key()]
 
+    # Проверка остатков
+    def test_save_rests(self):
+        # Подготовка
+        with open(self.__saved_reposity, 'r', encoding="utf-8") as file:
+            data = json.load(file)
+        self.preload(data, "nomenclature_group_model")
+        self.preload(data, "measure_model")
+        self.preload(data, "nomenclature_model")
+        self.preload(data, "storage_model")
+        self.preload(data, "income_transaction_model")
+        self.preload(data, "outcome_transaction_model")
+
+        # Действие
+
+        # Проверки
+        assert "rest_model" in data
+        for rest in data["rest_model"]:
+            dto = rest_dto().create(rest)
+            model = rest_model.from_dto(dto, self.__cache)
+            assert isinstance(model, rest_model)
+            model.unique_code = dto.id
+            rest_from_service = self.__start_service.data[reposity.rest_key()][model.nomenclature.unique_code]
+            assert model.nomenclature == rest_from_service.nomenclature
+            assert model.measure == rest_from_service.measure
+            assert model.value == rest_from_service.value
+
     # Проверка всего репозитория
     def test_save_reposity(self):
         # Подготовка
@@ -194,6 +226,7 @@ class test_saving_reposity(unittest.TestCase):
         self.preload(data, "income_transaction_model")
         self.preload(data, "outcome_transaction_model")
         self.preload(data, "recipe_model")
+        self.preload(data, "rest_model")
 
         # Действие
 

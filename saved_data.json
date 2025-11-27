@@ -179,43 +179,43 @@
         {
           "name": "Картофель",
           "nomenclature_id": "0c101a7e-5934-4155-83a6-d2c388fcc11a",
-          "id": "732dd51a59bc451bba45fe301353dbc8",
+          "id": "c91cdb68b8494eb5be0e559849a0b327",
           "value": 400
         },
         {
           "name": "Грибы",
           "nomenclature_id": "de92caf7-731c-44cf-a9f4-31237e6fe707",
-          "id": "b06ff6505a8f4c5d98c57e159d7eb9c3",
+          "id": "e34d0dcc0b8b45e486791eeb2e383a97",
           "value": 300
         },
         {
           "name": "Лук",
           "nomenclature_id": "39d9349d-28fa-4c7b-ad92-5c5fc7cf93da",
-          "id": "44afd984f4e849ffba64f0ecb5cddfea",
+          "id": "03afce788bcc448a8e5676c8e61da6df",
           "value": 1
         },
         {
           "name": "Кетчуп",
           "nomenclature_id": "3ce75449-05e8-4921-9310-9bcd0be7095b",
-          "id": "77f13d09ab1447e194551ece476c36c0",
+          "id": "24b80a6713fd442b998d71d3b156542b",
           "value": 200
         },
         {
           "name": "Майонез",
           "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff009",
-          "id": "267192f92ccb402bb4ef1ac9cf6a4ca7",
+          "id": "86f3460237cd4cc3b3c3bb946e8a38f4",
           "value": 200
         },
         {
           "name": "Сыр(тертый)",
           "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff00a",
-          "id": "80f3b59ac46749c9b179cdf1d7d64070",
+          "id": "f7ff60b05e3c4594896c4b61b96f4af8",
           "value": 200
         },
         {
           "name": "Помидоры",
           "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff008",
-          "id": "eea8c5c71393405480b6bf5ba3b1d5e7",
+          "id": "6bda12113f494df5870e65ccf0ff0712",
           "value": 3
         }
       ],
@@ -223,6 +223,7 @@
       "id": "294d2ed7311648c593712bd1ee26db65"
     }
   ],
+  "rest_model": [],
   "storage_model": [
     {
       "name": "Склад_1",
@@ -232,5 +233,7 @@
       "name": "Склад_2",
       "id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2"
     }
-  ]
+  ],
+  "block_date": "2024-01-01",
+  "first_start": false
 }

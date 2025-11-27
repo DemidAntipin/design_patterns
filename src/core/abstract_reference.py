@@ -12,7 +12,7 @@ class abstact_reference(ABC):
     __unique_code:str
 
     # Наименование модели (50)
-    __name: str = ""
+    __name: str = None
 
     def __init__(self) -> None:
         super().__init__()
