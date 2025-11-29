@@ -34,6 +34,20 @@ class event_type:
         return "remove_reference"
     
     """
+    Событие - обновить зависимости от reference
+    """
+    @staticmethod
+    def update_dependencies() -> str:
+        return "update_dependencies"
+    
+    """
+    Событие - проверить зависимости от reference
+    """
+    @staticmethod
+    def check_dependencies() -> str:
+        return "check_dependencies"
+
+    """
     Событие - логгирование уровня INFO
     """
     @staticmethod

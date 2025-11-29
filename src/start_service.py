@@ -281,16 +281,6 @@ class start_service(abstract_subscriber):
         with open(abs_path, 'w', encoding='utf-8') as file:
             json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)
 
-    def update_dependencies(self, dependencies, old_model, new_model, item_list):
-        for item in item_list:
-            for field in common.get_fields(item):
-                value = getattr(item, field)
-                if isinstance(value, list) and all(type(item) in dependencies for item in value):
-                    self.update_dependencies(dependencies, old_model, new_model, value)
-                if old_model == value:
-                    # Обновить значение
-                    setattr(item, field, new_model)
-
     """
     Обработка событий
     """
@@ -312,41 +302,25 @@ class start_service(abstract_subscriber):
             old_model = self.repo.get_by_unique_code(params["model"]["unique_code"])
             if not old_model:
                 raise operation_exception(f"Объект с кодом {params["model"]["unique_code"]} не найден.")
+            self.data[reposity.rest_key()]=list(self.data[reposity.rest_key()].values())
             # Получить dto объекта, обновить его и перезаписать объект
             dto_dict = object_to_dto(factory_converters().convert(old_model))
             dto_dict.update(params["properties"])
             dto = self.__match[model_type][0]().create(dto_dict)
             model=self.__match[model_type][1].from_dto(dto, self.__cache)
-            self.data[reposity.rest_key()] = list(self.data[reposity.rest_key()].values()) 
-            # Получить список классов, потенциально содержащих измененную сущность
-            dependencies = model.get_dependencies()
-            for dependency in dependencies:
-                key = dependency.__name__
-                if key not in reposity.keys(): continue
-                # Обновить зависимости сущности
-                self.update_dependencies(dependencies, old_model, model, self.data[key])
+            # Рассылка всем моделям проверить зависимость от old_model, и обновится, если зависимость обнаружена.
+            observe_service.create_event( event_type.update_dependencies(), params={"old_model":old_model, "new_model":model})
             self.__pop_item(model_type, old_model)
             self.__save_item(model_type, dto, model)
-            self.data[reposity.rest_key()] = {elem.nomenclature.unique_code: elem for elem in self.data[reposity.rest_key()]}
+            self.data[reposity.rest_key()] = {rest.nomenclature.unique_code: rest for rest in self.data[reposity.rest_key()]}
         elif event == event_type.remove_reference():
             model_type = params["model"]["type"]
             # Получить объект по коду
             model = self.repo.get_by_unique_code(params["model"]["unique_code"])
             if not model:
                 raise operation_exception(f"Объект с кодом {params["model"]["unique_code"]} не найден.")
-            save = self.data[reposity.rest_key()]
-            self.data[reposity.rest_key()] = list(self.data[reposity.rest_key()].values()) 
-            # Получить список классов, потенциально содержащих удаляемую сущность
-            dependencies = model.get_dependencies()
-            for dependency in dependencies:
-                key = dependency.__name__
-                if key not in reposity.keys(): continue
-                # Проверить список моделей определенного класса
-                for item in self.data[key]:
-                    # Проверка что модель содержит удаляемую сущность
-                    if model in common.get_values(item):
-                        raise operation_exception(f"Отказ в удалении объекта по причине: удаляемый объект содержится в {item}.")
+            # Рассылка всем моделям проверить зависимость от model, и вызвать исключение, если зависимость обнаружна.
+            observe_service.create_event(event_type.check_dependencies(), params={"model":model})
             self.__pop_item(model_type, model)
-            self.data[reposity.rest_key()] = save
         elif event == event_type.change_block_period():
             self.save_reposity("appsettings.json")

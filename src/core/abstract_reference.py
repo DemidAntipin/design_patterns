@@ -2,12 +2,14 @@ from abc import ABC
 import uuid
 from src.core.validator import validator, operation_exception
 from functools import total_ordering
-
+from src.core.abstract_subscriber import abstract_subscriber
+from src.core.observe_service import observe_service
+from src.core.event_type import event_type
 
 # Абстрактная модель с полем уникального кода для однозначной идентификации объектов. От AbstractModel наследуются все модели приложения.
 # total_ordering, используя методы __eq__ и __lt__, сгенерирует остальные сравнения автоматически
 @total_ordering
-class abstact_reference(ABC):
+class abstact_reference(ABC, abstract_subscriber):
     # Уникальный ID модели
     __unique_code:str
 
@@ -17,8 +19,8 @@ class abstact_reference(ABC):
     def __init__(self) -> None:
         super().__init__()
         self.__unique_code = uuid.uuid4().hex
+        observe_service.add(self)
 
-    
     # Уникальный код
     @property
     def unique_code(self) -> str:
@@ -59,54 +61,25 @@ class abstact_reference(ABC):
     def __str__(self):
         return self.unique_code
     
-    # Получить зависимости класса (список моделей, которые прямо или косвенно (через list, dict или другой класс) имеют поле данного класса)
-    # Например для nomenclature_model вернутся [transaction_model, rest_model, recipe_model, ingredient_model]
-    @classmethod
-    def get_dependencies(cls) -> list:
-        result = []
-        all_classes = cls.get_all_subclasses(abstact_reference)
-    
-        for target_class in all_classes:
-            if cls.check_class_annotations(target_class):
-                result.append(target_class)
-    
-        return result
-    
-    @classmethod
-    def get_all_subclasses(cls, base_class):
-        """Рекурсивно получить все подклассы"""
-        all_subclasses = []
-        stack = [base_class]
-        while stack:
-            current = stack.pop()
-            for subclass in current.__subclasses__():
-                if subclass not in all_subclasses:
-                    all_subclasses.append(subclass)
-                    stack.append(subclass)
-        return all_subclasses
-    
-    @classmethod
-    def check_class_annotations(cls, target_class, visited=None):
-        """Проверить аннотации класса на наличие текущего типа"""
-        if visited is None:
-            visited = set()
-        # Избегаем бесконечной рекурсии при циклических зависимостях
-        if target_class in visited:
-            return False
-        visited.add(target_class)
-        # Получаем все аннотации (включая унаследованные)
-        all_annotations = {}
-        for base in target_class.__mro__:
-            if hasattr(base, '__annotations__'):
-                all_annotations.update(base.__annotations__)
-        # Проверяем каждую аннотацию
-        for annotation in all_annotations.values():
-            if annotation is cls:
-                return True
-            if hasattr(annotation, '__args__'):
-                for arg in annotation.__args__:
-                    if arg is cls:
-                        return True
-                    if isinstance(arg, type) and issubclass(arg, abstact_reference):
-                        return cls.check_class_annotations(arg, visited)
-        return False
+    """
+    Обработка событий
+    """
+    def handle(self, event:str, params:dict):
+        from src.core.common import common
+        validator.validate(params, dict)
+        super().handle(event, params)
+
+        if event == event_type.update_dependencies():
+            old_model = params["old_model"]
+            new_model = params["new_model"]
+            validator.validate(old_model, abstact_reference)
+            validator.validate(new_model, abstact_reference)
+            for field in common.get_fields(self):
+                if getattr(self, field) == old_model:
+                    setattr(self, field, new_model)
+        elif event == event_type.check_dependencies():
+            model = params["model"]
+            validator.validate(model, abstact_reference)
+            for field in common.get_fields(self):
+                if getattr(self, field) == model:
+                    raise operation_exception(f"Отказ в удалении объекта по причине: удаляемый объект содержится в {self}.")
