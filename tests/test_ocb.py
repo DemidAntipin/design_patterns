@@ -17,11 +17,11 @@ class test_ocb(unittest.TestCase):
         ocb_ = ocb(service)
         ocb_.data = service.data
         expected_value = 0
-        for transaction in service.data[reposity.income_transaction_key()]:
+        for transaction in service.data[reposity.transaction_key()]:
             expected_value += transaction.measure.to_base_unit_value(transaction.value)
 
         # Действие
-        value = ocb_.calculate(service.data[reposity.income_transaction_key()])
+        value = sum(ocb_.calculate(service.data[reposity.transaction_key()]))
 
         # Проверки
         assert value == expected_value

@@ -1,5 +1,5 @@
 {
-  "income_transaction_model": [
+  "transaction_model": [
     {
       "date": "2024-01-10",
       "measure_id": "a33dd457-36a8-4de6-b5f1-40afa6193346",
@@ -44,6 +44,51 @@
       "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",
       "id": "7f4ecdab-0f01-4216-8b72-4c91d2226944",
       "value": 150
+    },
+        {
+      "date": "2024-01-14",
+      "measure_id": "a33dd457-36a8-4de6-b5f1-40afa6193346",
+      "name": null,
+      "nomenclature_id": "0c101a7e-5934-4155-83a6-d2c388fcc11a",
+      "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",
+      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226935",
+      "value": -100
+    },
+    {
+      "date": "2024-01-15",
+      "measure_id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",
+      "name": null,
+      "nomenclature_id": "39d9349d-28fa-4c7b-ad92-5c5fc7cf93da",
+      "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",
+      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226936",
+      "value": -50
+    },
+    {
+      "date": "2024-01-16",
+      "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+      "name": null,
+      "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff009",
+      "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",
+      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226937",
+      "value": -5000
+    },
+    {
+      "date": "2024-01-17",
+      "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+      "name": null,
+      "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff00a",
+      "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",
+      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226938",
+      "value": -3000
+    },
+    {
+      "date": "2024-01-18",
+      "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
+      "name": null,
+      "nomenclature_id": "de92caf7-731c-44cf-a9f4-31237e6fe707",
+      "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",
+      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226939",
+      "value": -8000
     }
   ],
   "measure_model": [
@@ -114,53 +159,6 @@
       "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
       "name": "Сыр(тертый)",
       "id": "fc389d90-2c41-4495-8d04-56d75acff00a"
-    }
-  ],
-  "outcome_transaction_model": [
-    {
-      "date": "2024-01-14",
-      "measure_id": "a33dd457-36a8-4de6-b5f1-40afa6193346",
-      "name": null,
-      "nomenclature_id": "0c101a7e-5934-4155-83a6-d2c388fcc11a",
-      "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",
-      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226935",
-      "value": 100
-    },
-    {
-      "date": "2024-01-15",
-      "measure_id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",
-      "name": null,
-      "nomenclature_id": "39d9349d-28fa-4c7b-ad92-5c5fc7cf93da",
-      "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",
-      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226936",
-      "value": 50
-    },
-    {
-      "date": "2024-01-16",
-      "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
-      "name": null,
-      "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff009",
-      "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",
-      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226937",
-      "value": 5000
-    },
-    {
-      "date": "2024-01-17",
-      "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
-      "name": null,
-      "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff00a",
-      "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",
-      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226938",
-      "value": 3000
-    },
-    {
-      "date": "2024-01-18",
-      "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
-      "name": null,
-      "nomenclature_id": "de92caf7-731c-44cf-a9f4-31237e6fe707",
-      "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",
-      "id": "7f4ecdab-0f01-4216-8b72-4c91d2226939",
-      "value": 8000
     }
   ],
   "recipe_model": [

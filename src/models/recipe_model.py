@@ -4,18 +4,19 @@ from src.core.entity_model import entity_model
 from src.models.ingredient_model import ingredient_model
 from src.dtos.recipe_dto import recipe_dto
 from src.dtos.ingredient_dto import ingredient_dto
+from typing import List
 
 # модель рецепта
 class recipe_model(entity_model):
     # список ингредиентов
-    __ingredients: list = None
+    __ingredients: List[ingredient_model] = None
     # алгоритм приготовления
-    __description: list = None
+    __description: List[str] = None
 
     def __init__(self):
        super().__init__()
-       self.__ingredients: list = list()
-       self.__description: list = list()
+       self.__ingredients: List[ingredient_model] = list()
+       self.__description: List[str] = list()
 
     @staticmethod
     def create(name):

@@ -26,7 +26,7 @@ class test_filters(unittest.TestCase):
         # Подготовка
         service = start_service()
         service.start()
-        transactions = service.data[reposity.income_transaction_key()]
+        transactions = service.data[reposity.transaction_key()]
         proto = prototype(transactions)
 
         # Действие
@@ -44,7 +44,7 @@ class test_filters(unittest.TestCase):
         # Подготовка
         service = start_service()
         service.start()
-        transactions = service.data[reposity.income_transaction_key()]
+        transactions = service.data[reposity.transaction_key()]
         proto = prototype(transactions)
         filters = filter_sorting_dto([], [])
 
@@ -136,7 +136,7 @@ class test_filters(unittest.TestCase):
         # Подготовка
         service = start_service()
         service.start()
-        data = service.data[reposity.income_transaction_key()]
+        data = service.data[reposity.transaction_key()]
         measure = service.data[reposity.measure_key()][0]
         proto = prototype(data)
         filters = filter_sorting_dto([{
@@ -166,7 +166,7 @@ class test_filters(unittest.TestCase):
         # Подготовка
         service = start_service()
         service.start()
-        data = service.data[reposity.income_transaction_key()]
+        data = service.data[reposity.transaction_key()]
         proto = prototype(data)
         filters = filter_sorting_dto([], ["measure", "unique_code"])
 

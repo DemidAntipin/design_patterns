@@ -1,3 +1,5 @@
+from src.core.validator import validator
+
 # репозиторий данных
 class reposity:
     # словарь наименований моделей
@@ -32,14 +34,10 @@ class reposity:
     def storage_key():
         return "storage_model"
 
-    # ключи для транзакций
+    # ключ для транзакций
     @staticmethod
-    def income_transaction_key():
-        return "income_transaction_model"
-
-    @staticmethod
-    def outcome_transaction_key():
-        return "outcome_transaction_model"
+    def transaction_key():
+        return "transaction_model"
     
     @staticmethod
     def rest_key():
@@ -68,3 +66,13 @@ class reposity:
         for key in keys:
             self.__data[ key ] = []
         self.__data[self.rest_key()] = {}
+
+    """Метод получения объекта в памяти по уникальному коду"""
+    def get_by_unique_code(self, unique_code: str):
+        validator.validate(unique_code, str)
+        for key in self.keys():
+            items = self.data[key]
+            for item in items:
+                if item.unique_code == unique_code:
+                    return item
+        return None

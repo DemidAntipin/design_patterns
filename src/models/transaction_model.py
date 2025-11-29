@@ -1,5 +1,5 @@
 from src.dtos.transaction_dto import transaction_dto
-from src.core.entity_model import entity_model
+from src.core.abstract_reference import abstact_reference
 from src.core.validator import validator
 from src.models.storage_model import storage_model
 from src.models.nomenclature_model import nomeclature_model
@@ -7,7 +7,7 @@ from src.models.measure_model import measure_model
 from datetime import datetime
 
 # Модель единиц измерения для моделей номенклатуры
-class transaction_model(entity_model):
+class transaction_model(abstact_reference):
     # Дата транзакции
     __date : datetime = None
     # Склад транзакции

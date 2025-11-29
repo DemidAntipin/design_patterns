@@ -55,6 +55,8 @@ class common:
 
                 if recurse and isinstance(value, abstact_reference):
                     result.extend(common.get_values(value, recurse))
+                elif isinstance(value, list):
+                    result.extend(value)
                 result.append(value)
 
         return result

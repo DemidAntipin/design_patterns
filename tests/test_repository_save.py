@@ -40,8 +40,7 @@ class test_saving_reposity(unittest.TestCase):
         "nomenclature_group_model": (category_dto, nomenclature_group_model),
         "nomenclature_model": (nomenclature_dto, nomeclature_model),
         "storage_model":(storage_dto, storage_model),
-        "income_transaction_model": (transaction_dto, transaction_model),
-        "outcome_transaction_model": (transaction_dto, transaction_model),
+        "transaction_model": (transaction_dto, transaction_model),
         "recipe_model": (recipe_dto, recipe_model),
         "rest_model": (rest_dto, rest_model)
     }
@@ -173,20 +172,13 @@ class test_saving_reposity(unittest.TestCase):
         # Действие
         
         # Проверки
-        assert "income_transaction_model" in data
-        for transaction in data["income_transaction_model"]:
+        assert "transaction_model" in data
+        for transaction in data["transaction_model"]:
             dto = transaction_dto().create(transaction)
             model = transaction_model.from_dto(dto, self.__cache)
             assert isinstance(model, transaction_model)
             model.unique_code = dto.id
-            assert model in self.__start_service.data[reposity.income_transaction_key()]
-        assert "outcome_transaction_model" in data
-        for transaction in data["outcome_transaction_model"]:
-            dto = transaction_dto().create(transaction)
-            model = transaction_model.from_dto(dto, self.__cache)
-            assert isinstance(model, transaction_model)
-            model.unique_code = dto.id
-            assert model in self.__start_service.data[reposity.outcome_transaction_key()]
+            assert model in self.__start_service.data[reposity.transaction_key()]
 
     # Проверка остатков
     def test_save_rests(self):
@@ -197,8 +189,7 @@ class test_saving_reposity(unittest.TestCase):
         self.preload(data, "measure_model")
         self.preload(data, "nomenclature_model")
         self.preload(data, "storage_model")
-        self.preload(data, "income_transaction_model")
-        self.preload(data, "outcome_transaction_model")
+        self.preload(data, "transaction_model")
 
         # Действие
 
@@ -223,8 +214,7 @@ class test_saving_reposity(unittest.TestCase):
         self.preload(data, "measure_model")
         self.preload(data, "nomenclature_model")
         self.preload(data, "storage_model")
-        self.preload(data, "income_transaction_model")
-        self.preload(data, "outcome_transaction_model")
+        self.preload(data, "transaction_model")
         self.preload(data, "recipe_model")
         self.preload(data, "rest_model")
 

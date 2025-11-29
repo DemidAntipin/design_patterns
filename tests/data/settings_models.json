@@ -131,13 +131,13 @@
                 "id":"7f4ecdab-0f01-4216-8b72-64efc2468ab2"
             }
         ],
-        "outcome_transactions" : [
+        "transactions" : [
             {
                 "date": "2024-01-14",
                 "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367", 
                 "nomenclature_id": "0c101a7e-5934-4155-83a6-d2c388fcc11a", 
                 "measure_id": "a33dd457-36a8-4de6-b5f1-40afa6193346",  
-                "value": 100,
+                "value": -100,
                 "id":"7f4ecdab-0f01-4216-8b72-4c91d2226935"
             },
             {
@@ -145,7 +145,7 @@
                 "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367", 
                 "nomenclature_id": "39d9349d-28fa-4c7b-ad92-5c5fc7cf93da",  
                 "measure_id": "f8346e8b-7260-4db8-a673-c8c826ab08b7",  
-                "value": 50,
+                "value": -50,
                 "id":"7f4ecdab-0f01-4216-8b72-4c91d2226936"
             },
             {
@@ -153,7 +153,7 @@
                 "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",  
                 "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff009",  
                 "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",  
-                "value": 5000,
+                "value": -5000,
                 "id":"7f4ecdab-0f01-4216-8b72-4c91d2226937"
             },
             {
@@ -161,7 +161,7 @@
                 "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",  
                 "nomenclature_id": "fc389d90-2c41-4495-8d04-56d75acff00a",  
                 "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",  
-                "value": 3000,
+                "value": -3000,
                 "id":"7f4ecdab-0f01-4216-8b72-4c91d2226938"
             },
             {
@@ -169,11 +169,9 @@
                 "storage_id": "7f4ecdab-0f01-4216-8b72-64efc2468ab2",  
                 "nomenclature_id": "de92caf7-731c-44cf-a9f4-31237e6fe707", 
                 "measure_id": "adb7510f-687d-428f-a697-26e53d3f65b7",
-                "value": 8000,
+                "value": -8000,
                 "id":"7f4ecdab-0f01-4216-8b72-4c91d2226939"
-            }
-        ],
-        "income_transactions" : [
+            },
             {
                 "date": "2024-01-10",
                 "storage_id": "7f4ecdab-0f01-4216-8b72-530684076367",  
