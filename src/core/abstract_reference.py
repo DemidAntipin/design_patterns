@@ -1,6 +1,6 @@
 from abc import ABC
 import uuid
-from src.core.validator import validator
+from src.core.validator import validator, operation_exception
 from functools import total_ordering
 
 
@@ -58,3 +58,55 @@ class abstact_reference(ABC):
     
     def __str__(self):
         return self.unique_code
+    
+    # Получить зависимости класса (список моделей, которые прямо или косвенно (через list, dict или другой класс) имеют поле данного класса)
+    # Например для nomenclature_model вернутся [transaction_model, rest_model, recipe_model, ingredient_model]
+    @classmethod
+    def get_dependencies(cls) -> list:
+        result = []
+        all_classes = cls.get_all_subclasses(abstact_reference)
+    
+        for target_class in all_classes:
+            if cls.check_class_annotations(target_class):
+                result.append(target_class)
+    
+        return result
+    
+    @classmethod
+    def get_all_subclasses(cls, base_class):
+        """Рекурсивно получить все подклассы"""
+        all_subclasses = []
+        stack = [base_class]
+        while stack:
+            current = stack.pop()
+            for subclass in current.__subclasses__():
+                if subclass not in all_subclasses:
+                    all_subclasses.append(subclass)
+                    stack.append(subclass)
+        return all_subclasses
+    
+    @classmethod
+    def check_class_annotations(cls, target_class, visited=None):
+        """Проверить аннотации класса на наличие текущего типа"""
+        if visited is None:
+            visited = set()
+        # Избегаем бесконечной рекурсии при циклических зависимостях
+        if target_class in visited:
+            return False
+        visited.add(target_class)
+        # Получаем все аннотации (включая унаследованные)
+        all_annotations = {}
+        for base in target_class.__mro__:
+            if hasattr(base, '__annotations__'):
+                all_annotations.update(base.__annotations__)
+        # Проверяем каждую аннотацию
+        for annotation in all_annotations.values():
+            if annotation is cls:
+                return True
+            if hasattr(annotation, '__args__'):
+                for arg in annotation.__args__:
+                    if arg is cls:
+                        return True
+                    if isinstance(arg, type) and issubclass(arg, abstact_reference):
+                        return cls.check_class_annotations(arg, visited)
+        return False

@@ -3,13 +3,17 @@ from src.core.validator import argument_exception
 from src.core.validator import operation_exception
 from src.core.validator import validator
 from src.models.company_model import company_model
+from src.core.abstract_subscriber import abstract_subscriber
+from src.core.event_type import event_type
+from src.core.observe_service import observe_service
+from datetime import datetime
 import json
 import os
 
 ####################################################3
 # Менеджер настроек. 
 # Предназначен для управления настройками и хранения параметров приложения
-class settings_manager():
+class settings_manager(abstract_subscriber):
     # Наименование файла (полный путь)
     __file_name:str = ""
 
@@ -24,6 +28,7 @@ class settings_manager():
 
     def __init__(self):
         self.default()
+        observe_service.add(self)
 
     # Текущие настройки
     @property
@@ -84,3 +89,15 @@ class settings_manager():
         company.name = "Ромашка"
         self.__settings = settings_model()
         self.__settings.company = company
+
+    """
+    Обработка событий
+    """
+    def handle(self, event:str, params:dict):
+        validator.validate(params, dict)
+        super().handle(event, params)
+
+        if event == event_type.change_block_period():
+            new_block_date = params["new_block_date"]
+            validator.validate(new_block_date, datetime)
+            self.__settings.block_date = new_block_date

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import Response, JSONResponse
 import uvicorn
-from src.core.requests import ocb_request, filter_request, block_date_request
+from src.core.requests import ocb_request, filter_request, block_date_request, reference_get, reference
 from src.core.prototype import prototype
 import json
 import os
@@ -17,6 +17,9 @@ from src.core.abstract_dto import object_to_dto
 from src.logic.ocb import ocb
 from src.logic.rests import rests
 from datetime import datetime
+from src.core.observe_service import observe_service
+from src.core.event_type import event_type
+from src.logic.reference_service import reference_service
 
 # Инициализация сервиса
 settings_file = "./settings.json"
@@ -61,7 +64,7 @@ async def get_rests_at_date(date_str: str):
 @app.post("/api/block_date/update")
 async def update_block_date(request: block_date_request):
     try:
-        rests().update_block_date(request.new_block_date)
+        observe_service.create_event(event_type.change_block_period(), {"new_block_date": request.new_block_date})
         result = {"status": "success", "new_block_date": datetime.strftime(request.new_block_date, "%Y-%m-%d")}
         return JSONResponse(content=result, media_type="application/json; charset=utf-8")
     except Exception as e:
@@ -102,6 +105,42 @@ async def save_data(path:str= Query(..., description="Путь для сохра
         return {"status": "SUCCESS", "saved_to": os.path.abspath(path)}
     except Exception as e:
         return {"status": "ERROR", "error": e}
+
+@app.get("/api/reference/{id}")
+async def get_reference(id:str):
+    model = service.repo.get_by_unique_code(id)
+    if model:
+        return JSONResponse(content=factory_converter.convert(model), media_type="application/json; charset=utf-8")
+    else:
+        raise HTTPException(status_code=400, detail=f"Объект с кодом {id} не найден.")
+
+@app.put("/api/reference")
+async def put_reference(request: reference):
+    try:
+        reference_service.add(request.type, request.properties)
+        return {"status":"SUCCESS"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)
+
+@app.patch("/api/reference")
+async def patch_reference(request: reference):
+    if not "unique_code" in request.properties.keys():
+        raise HTTPException(status_code=400, detail=f"Отсутствует необходимое поле unique_code")
+    try:
+        reference_service.change(request.type, request.properties)
+        return {"status":"SUCCESS"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)
+
+@app.delete("/api/reference")
+async def remove_reference(request: reference):
+    if not "unique_code" in request.properties.keys():
+        raise HTTPException(status_code=400, detail=f"Отсутствует необходимое поле unique_code")
+    try:
+        reference_service.remove(request.type, request.properties)
+        return {"status":"SUCCESS"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)
 
 @app.get("/api/responses/build")
 async def build_response(
