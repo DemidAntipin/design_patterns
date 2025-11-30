@@ -25,6 +25,9 @@ from src.core.event_type import event_type
 from src.core.common import common
 import os
 import json
+from src.dtos.reference_dto import reference_dto
+from src.dtos.update_dependencies_dto import update_dependencies_dto
+from src.dtos.check_dependencies_dto import check_dependencies_dto
 
 class start_service(abstract_subscriber):
     __repo:reposity = reposity()
@@ -284,43 +287,47 @@ class start_service(abstract_subscriber):
     """
     Обработка событий
     """
-    def handle(self, event:str, params:dict):
-        validator.validate(params, dict)
+    def handle(self, event:str, params:reference_dto):
         super().handle(event, params)
 
         if event == event_type.add_reference():
-            model_type = params["model"]
+            validator.validate(params, reference_dto)
+            model_type = params.name
             if model_type not in self.__match.keys():
                 raise argument_exception(f"Получена неизвестная модель {model_type}. Доступны только следующие модели: {self.__match.keys()}")
-            dto = self.__match[model_type][0]().create(params["properties"])
+            dto = self.__match[model_type][0]().create(params.model_dto_dict)
             model = self.__match[model_type][1].from_dto(dto, self.__cache)
             if model not in self.data[model_type]:
                 self.__save_item(model_type, dto, model)
         elif event == event_type.change_reference():
-            model_type = params["model"]["type"]
+            validator.validate(params, reference_dto)
+            model_type = params.name
             # Получить объект по коду
-            old_model = self.repo.get_by_unique_code(params["model"]["unique_code"])
+            old_model = self.repo.get_by_unique_code(params.id)
             if not old_model:
-                raise operation_exception(f"Объект с кодом {params["model"]["unique_code"]} не найден.")
+                raise operation_exception(f"Объект с кодом {params.id} не найден.")
             self.data[reposity.rest_key()]=list(self.data[reposity.rest_key()].values())
             # Получить dto объекта, обновить его и перезаписать объект
             dto_dict = object_to_dto(factory_converters().convert(old_model))
-            dto_dict.update(params["properties"])
+            dto_dict.update(params.model_dto_dict)
             dto = self.__match[model_type][0]().create(dto_dict)
             model=self.__match[model_type][1].from_dto(dto, self.__cache)
+            update_dto = update_dependencies_dto().create({"old_model":old_model, "new_model":model})
             # Рассылка всем моделям проверить зависимость от old_model, и обновится, если зависимость обнаружена.
-            observe_service.create_event( event_type.update_dependencies(), params={"old_model":old_model, "new_model":model})
+            observe_service.create_event( event_type.update_dependencies(), update_dto)
             self.__pop_item(model_type, old_model)
             self.__save_item(model_type, dto, model)
             self.data[reposity.rest_key()] = {rest.nomenclature.unique_code: rest for rest in self.data[reposity.rest_key()]}
         elif event == event_type.remove_reference():
-            model_type = params["model"]["type"]
+            validator.validate(params, reference_dto)
+            model_type = params.name
             # Получить объект по коду
-            model = self.repo.get_by_unique_code(params["model"]["unique_code"])
+            model = self.repo.get_by_unique_code(params.id)
             if not model:
-                raise operation_exception(f"Объект с кодом {params["model"]["unique_code"]} не найден.")
+                raise operation_exception(f"Объект с кодом {params.id} не найден.")
+            check_dto = check_dependencies_dto().create({"model":model})
             # Рассылка всем моделям проверить зависимость от model, и вызвать исключение, если зависимость обнаружна.
-            observe_service.create_event(event_type.check_dependencies(), params={"model":model})
+            observe_service.create_event(event_type.check_dependencies(), check_dto)
             self.__pop_item(model_type, model)
         elif event == event_type.change_block_period():
             self.save_reposity("appsettings.json")

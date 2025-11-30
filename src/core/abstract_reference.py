@@ -64,22 +64,22 @@ class abstact_reference(ABC, abstract_subscriber):
     """
     Обработка событий
     """
-    def handle(self, event:str, params:dict):
+    def handle(self, event:str, params):
         from src.core.common import common
-        validator.validate(params, dict)
         super().handle(event, params)
 
         if event == event_type.update_dependencies():
-            old_model = params["old_model"]
-            new_model = params["new_model"]
-            validator.validate(old_model, abstact_reference)
-            validator.validate(new_model, abstact_reference)
+            from src.dtos.update_dependencies_dto import update_dependencies_dto
+            validator.validate(params, update_dependencies_dto)
+            old_model = params.old_model
+            new_model = params.new_model
             for field in common.get_fields(self):
                 if getattr(self, field) == old_model:
                     setattr(self, field, new_model)
         elif event == event_type.check_dependencies():
-            model = params["model"]
-            validator.validate(model, abstact_reference)
+            from src.dtos.check_dependencies_dto import check_dependencies_dto
+            validator.validate(params, check_dependencies_dto)
+            model = params.model
             for field in common.get_fields(self):
                 if getattr(self, field) == model:
                     raise operation_exception(f"Отказ в удалении объекта по причине: удаляемый объект содержится в {self}.")

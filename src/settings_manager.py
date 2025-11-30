@@ -9,6 +9,7 @@ from src.core.observe_service import observe_service
 from datetime import datetime
 import json
 import os
+from src.dtos.block_date_dto import block_date_dto
 
 ####################################################3
 # Менеджер настроек. 
@@ -93,11 +94,11 @@ class settings_manager(abstract_subscriber):
     """
     Обработка событий
     """
-    def handle(self, event:str, params:dict):
-        validator.validate(params, dict)
+    def handle(self, event:str, params:block_date_dto):
         super().handle(event, params)
 
         if event == event_type.change_block_period():
-            new_block_date = params["new_block_date"]
+            validator.validate(params, block_date_dto)
+            new_block_date = params.new_block_date
             validator.validate(new_block_date, datetime)
             self.__settings.block_date = new_block_date

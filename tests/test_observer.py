@@ -7,7 +7,7 @@ from src.core.abstract_dto import object_to_dto
 from src.models.nomenclature_model import nomeclature_model
 from src.core.prototype import prototype
 from src.dtos.filter_sorting_dto import filter_sorting_dto
-from src.logic.rests import rests
+from src.dtos.block_date_dto import block_date_dto
 from src.core.observe_service import observe_service
 from src.core.event_type import event_type
 from datetime import datetime
@@ -48,7 +48,8 @@ class test_observer(unittest.TestCase):
         # Подготовка
         service = start_service()
         service.start()
-        observe_service.create_event(event_type.change_block_period(), params={"new_block_date": datetime(2025, 1, 1)})
+        date_dto = block_date_dto().create({"new_block_date": datetime(2025, 1, 1)})
+        observe_service.create_event(event_type.change_block_period(), date_dto)
         model_type="nomenclature_model"
         params={
             "unique_code": "0c101a7e-5934-4155-83a6-d2c388fcc11a",

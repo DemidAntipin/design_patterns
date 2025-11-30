@@ -1,18 +1,16 @@
-from src.core.validator import validator, argument_exception
+from src.core.validator import validator
 from src.reposity import reposity
-from src.models.nomenclature_model import nomeclature_model
 from src.models.transaction_model import transaction_model
 from src.core.prototype import prototype
-from src.dtos.filter_dto import filter_dto
 from src.dtos.filter_sorting_dto import filter_sorting_dto
 from src.start_service import start_service
-from src.core.filter_format import filter_format
 from datetime import datetime
 from src.models.rest_model import rest_model
 from src.logic.factory_converters import factory_converters
 from src.core.abstract_subscriber import abstract_subscriber
 from src.core.observe_service import observe_service
 from src.core.event_type import event_type
+from src.dtos.block_date_dto import block_date_dto
 
 class rests(abstract_subscriber):
 
@@ -83,14 +81,14 @@ class rests(abstract_subscriber):
     """
     Обработка событий
     """
-    def handle(self, event:str, params:dict):
-        validator.validate(params, dict)
+    def handle(self, event:str, params:block_date_dto):
         super().handle(event, params)
 
         # Инициализация rests() вызывает start_service.__init__() -> settings_manager.__init__()
         # Следовательно settings_manager, являясь singleton, подпишется на observe_service раньше,
         # rests, следовательно к моменту вызова rests.handle() дата блокировки будет гарантировано изменена.
         if event == event_type.change_block_period():
-            new_block_date = params["new_block_date"]
+            validator.validate(params, block_date_dto)
+            new_block_date = params.new_block_date
             validator.validate(new_block_date, datetime)
             self.update_block_date(new_block_date)  
