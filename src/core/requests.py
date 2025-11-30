@@ -14,3 +14,11 @@ class filter_request(BaseModel):
 
 class block_date_request(BaseModel):
     new_block_date: datetime
+
+class reference_get(BaseModel):
+    type: str
+    id: str
+
+class reference(BaseModel):
+    type: str
+    properties: Dict
