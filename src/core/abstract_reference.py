@@ -1,13 +1,15 @@
 from abc import ABC
 import uuid
-from src.core.validator import validator
+from src.core.validator import validator, operation_exception
 from functools import total_ordering
-
+from src.core.abstract_subscriber import abstract_subscriber
+from src.core.observe_service import observe_service
+from src.core.event_type import event_type
 
 # Абстрактная модель с полем уникального кода для однозначной идентификации объектов. От AbstractModel наследуются все модели приложения.
 # total_ordering, используя методы __eq__ и __lt__, сгенерирует остальные сравнения автоматически
 @total_ordering
-class abstact_reference(ABC):
+class abstact_reference(ABC, abstract_subscriber):
     # Уникальный ID модели
     __unique_code:str
 
@@ -17,8 +19,8 @@ class abstact_reference(ABC):
     def __init__(self) -> None:
         super().__init__()
         self.__unique_code = uuid.uuid4().hex
+        observe_service.add(self)
 
-    
     # Уникальный код
     @property
     def unique_code(self) -> str:
@@ -58,3 +60,26 @@ class abstact_reference(ABC):
     
     def __str__(self):
         return self.unique_code
+    
+    """
+    Обработка событий
+    """
+    def handle(self, event:str, params):
+        from src.core.common import common
+        super().handle(event, params)
+
+        if event == event_type.update_dependencies():
+            from src.dtos.update_dependencies_dto import update_dependencies_dto
+            validator.validate(params, update_dependencies_dto)
+            old_model = params.old_model
+            new_model = params.new_model
+            for field in common.get_fields(self):
+                if getattr(self, field) == old_model:
+                    setattr(self, field, new_model)
+        elif event == event_type.check_dependencies():
+            from src.dtos.check_dependencies_dto import check_dependencies_dto
+            validator.validate(params, check_dependencies_dto)
+            model = params.model
+            for field in common.get_fields(self):
+                if getattr(self, field) == model:
+                    raise operation_exception(f"Отказ в удалении объекта по причине: удаляемый объект содержится в {self}.")

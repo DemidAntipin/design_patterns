@@ -12,14 +12,24 @@ from src.core.validator import validator, argument_exception, operation_exceptio
 from src.models.storage_model import storage_model
 from src.models.transaction_model import transaction_model
 from src.dtos.transaction_dto import transaction_dto
+from src.dtos.recipe_dto import recipe_dto
+from src.dtos.storage_dto import storage_dto
 from src.logic.factory_converters import factory_converters
 from src.core.abstract_dto import object_to_dto
 from src.models.settings_model import settings_model
+from src.settings_manager import settings_manager
 from datetime import datetime
+from src.core.observe_service import observe_service
+from src.core.abstract_subscriber import abstract_subscriber
+from src.core.event_type import event_type
+from src.core.common import common
 import os
 import json
+from src.dtos.reference_dto import reference_dto
+from src.dtos.update_dependencies_dto import update_dependencies_dto
+from src.dtos.check_dependencies_dto import check_dependencies_dto
 
-class start_service():
+class start_service(abstract_subscriber):
     __repo:reposity = reposity()
 
     # Первый запуск
@@ -29,14 +39,23 @@ class start_service():
     # Ключ - id записи, значение - abstract_model
     __cache = {}
 
-    __settings: settings_model = None
+    __match = {
+        reposity.nomenclature_key() : (nomenclature_dto, nomeclature_model),
+        reposity.measure_key() : (measure_dto, measure_model),
+        reposity.nomenclature_group_key() : (category_dto, nomenclature_group_model),
+        reposity.storage_key() : (storage_dto, storage_model)
+    }
+
+    __settings: settings_manager = None
 
     # Наименование файла (полный путь)
     __full_file_name:str = ""
 
     def __init__(self):
         self.__repo.initalize()
-        self.__settings = settings_model()
+        self.__settings = settings_manager()
+        observe_service.add(self)
+
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
@@ -78,12 +97,12 @@ class start_service():
 
     @property
     def block_date(self) -> datetime:
-        return self.__settings.block_date
+        return self.__settings.settings.block_date
     
     @block_date.setter
     def block_date(self, value:datetime):
         validator.validate(value, datetime)
-        self.__settings.block_date = value
+        self.__settings.settings.block_date = value
 
     # Загрузить настройки из Json файла
     def load(self) -> bool:
@@ -95,7 +114,7 @@ class start_service():
                 settings = json.load(file_instance)
 
                 if "block_date" in settings.keys():
-                    self.__settings.block_date = datetime.strptime(settings["block_date"], self.__settings.datetime_format)
+                    self.__settings.settings.block_date = datetime.strptime(settings["block_date"], self.__settings.settings.datetime_format)
                 else:
                     return False
 
@@ -120,6 +139,12 @@ class start_service():
         item.unique_code = dto.id
         self.__cache.setdefault(dto.id, item)
         self.__repo.data[ key ].append(item)
+
+    # Удалить элемент из репозитория
+    def __pop_item(self, key:str, item):
+        validator.validate(key, str)
+        item = self.__cache.pop(item.unique_code)
+        self.__repo.data[key].remove(item)
 
     # Загрузить единицы измерений   
     def __convert_measures(self, data: dict) -> bool:
@@ -177,31 +202,18 @@ class start_service():
 
         return True
 
-    def __convert_income_transactions(   self, data: dict) -> bool:
+    def __convert_transactions(   self, data: dict) -> bool:
         validator.validate(data, dict)      
-        transactions = data['income_transactions'] if 'income_transactions' in data else []   
+        transactions = data['transactions'] if 'transactions' in data else []   
         if len(transactions) == 0:
             return False
          
         for transaction in transactions:
             dto = transaction_dto().create(transaction)
             item = transaction_model.from_dto(dto, self.__cache)
-            self.__save_item( reposity.income_transaction_key(), dto, item )
+            self.__save_item( reposity.transaction_key(), dto, item )
 
-        return True     
-
-    def __convert_expense_transactions(   self, data: dict) -> bool:
-        validator.validate(data, dict)      
-        transactions = data['outcome_transactions'] if 'outcome_transactions' in data else []   
-        if len(transactions) == 0:
-            return False
-         
-        for transaction in transactions:
-            dto = transaction_dto().create(transaction)
-            item = transaction_model.from_dto(dto, self.__cache)
-            self.__save_item( reposity.outcome_transaction_key(), dto, item )
-
-        return True    
+        return True      
 
 
     # Обработать полученный словарь    
@@ -223,8 +235,7 @@ class start_service():
         self.__convert_groups(data)
         self.__convert_nomenclatures(data)
         self.__convert_storages(data)   
-        self.__convert_income_transactions(data)
-        self.__convert_expense_transactions(data)   
+        self.__convert_transactions(data)  
 
 
         # Собираем рецепт
@@ -267,8 +278,56 @@ class start_service():
         save = self.data[reposity.rest_key()]
         self.data[reposity.rest_key()] = list(self.data[reposity.rest_key()].values())
         result = factory_converter.convert(self.data)
-        result["block_date"] = datetime.strftime(self.block_date, self.__settings.datetime_format)
+        result["block_date"] = datetime.strftime(self.block_date, self.__settings.settings.datetime_format)
         result["first_start"] = self.first_start
         self.data[reposity.rest_key()] = save
         with open(abs_path, 'w', encoding='utf-8') as file:
             json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)
+
+    """
+    Обработка событий
+    """
+    def handle(self, event:str, params:reference_dto):
+        super().handle(event, params)
+
+        if event == event_type.add_reference():
+            validator.validate(params, reference_dto)
+            model_type = params.name
+            if model_type not in self.__match.keys():
+                raise argument_exception(f"Получена неизвестная модель {model_type}. Доступны только следующие модели: {self.__match.keys()}")
+            dto = self.__match[model_type][0]().create(params.model_dto_dict)
+            model = self.__match[model_type][1].from_dto(dto, self.__cache)
+            if model not in self.data[model_type]:
+                self.__save_item(model_type, dto, model)
+        elif event == event_type.change_reference():
+            validator.validate(params, reference_dto)
+            model_type = params.name
+            # Получить объект по коду
+            old_model = self.repo.get_by_unique_code(params.id)
+            if not old_model:
+                raise operation_exception(f"Объект с кодом {params.id} не найден.")
+            self.data[reposity.rest_key()]=list(self.data[reposity.rest_key()].values())
+            # Получить dto объекта, обновить его и перезаписать объект
+            dto_dict = object_to_dto(factory_converters().convert(old_model))
+            dto_dict.update(params.model_dto_dict)
+            dto = self.__match[model_type][0]().create(dto_dict)
+            model=self.__match[model_type][1].from_dto(dto, self.__cache)
+            update_dto = update_dependencies_dto().create({"old_model":old_model, "new_model":model})
+            # Рассылка всем моделям проверить зависимость от old_model, и обновится, если зависимость обнаружена.
+            observe_service.create_event( event_type.update_dependencies(), update_dto)
+            self.__pop_item(model_type, old_model)
+            self.__save_item(model_type, dto, model)
+            self.data[reposity.rest_key()] = {rest.nomenclature.unique_code: rest for rest in self.data[reposity.rest_key()]}
+        elif event == event_type.remove_reference():
+            validator.validate(params, reference_dto)
+            model_type = params.name
+            # Получить объект по коду
+            model = self.repo.get_by_unique_code(params.id)
+            if not model:
+                raise operation_exception(f"Объект с кодом {params.id} не найден.")
+            check_dto = check_dependencies_dto().create({"model":model})
+            # Рассылка всем моделям проверить зависимость от model, и вызвать исключение, если зависимость обнаружна.
+            observe_service.create_event(event_type.check_dependencies(), check_dto)
+            self.__pop_item(model_type, model)
+        elif event == event_type.change_block_period():
+            self.save_reposity("appsettings.json")
