@@ -66,6 +66,7 @@ class abstact_reference(ABC, abstract_subscriber):
     """
     def handle(self, event:str, params):
         from src.core.common import common
+        from src.dtos.logger_dto import logger_dto
         super().handle(event, params)
 
         if event == event_type.update_dependencies():
@@ -76,10 +77,18 @@ class abstact_reference(ABC, abstract_subscriber):
             for field in common.get_fields(self):
                 if getattr(self, field) == old_model:
                     setattr(self, field, new_model)
+                    # Логгирование
+                    log_message = f"Изменение объекта {self} по причине: зависимость от объекта {old_model}, который был изменен."
+                    log_dto = logger_dto().create_debug("CRUD", log_message)
+                    observe_service.create_event(event_type.log(), log_dto)
         elif event == event_type.check_dependencies():
             from src.dtos.check_dependencies_dto import check_dependencies_dto
             validator.validate(params, check_dependencies_dto)
             model = params.model
             for field in common.get_fields(self):
                 if getattr(self, field) == model:
+                    # Логгирование
+                    log_message = f"Отказ в удалении объекта по причине: удаляемый объект содержится в {self}"
+                    log_dto = logger_dto().create_error("CRUD", log_message)
+                    observe_service.create_event(event_type.log(), log_dto)
                     raise operation_exception(f"Отказ в удалении объекта по причине: удаляемый объект содержится в {self}.")

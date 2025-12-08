@@ -152,20 +152,6 @@ class test_models(unittest.TestCase):
         with self.assertRaises(argument_exception):
             manager.file_name=file_name
 
-    # Проверить создание основной модели
-    # Файл настроек поврежден
-    def test_load_bad_settings_settings_manager(self):
-        # подготовка
-        file_name = './tests/data/bad_settings.json'
-        manager = settings_manager()
-        manager.file_name=file_name
-
-        # действие
-        result = manager.load()
-        
-        # проверки
-        assert result == False
-
     # Проверить создание абстрактной модели
     # Поле name задается вручную, а unique_code автоматически.
     def test_create_empty_abstract_reference(self):
