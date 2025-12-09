@@ -20,6 +20,9 @@ from src.models.rest_model import rest_model
 from src.dtos.rest_dto import rest_dto
 from src.logic.rests import rests
 from datetime import datetime
+from src.core.observe_service import observe_service
+from src.core.event_type import event_type
+from src.dtos.block_date_dto import block_date_dto
 
 class test_saving_reposity(unittest.TestCase):
     # Путь до файла с тестовыми настройками
@@ -61,7 +64,8 @@ class test_saving_reposity(unittest.TestCase):
         for key in self.__match.keys():
             self.__repo[key] = []
         self.__start_service.start(self.__settings_name)
-        rests().update_block_date(self.__start_service.block_date)
+        rests()
+        observe_service.create_event(event_type.change_block_period(), block_date_dto().create({"new_block_date": datetime(2025, 5, 12)}))
 
     # Проверка единиц измерения
     def test_save_measures(self):

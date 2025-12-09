@@ -11,15 +11,25 @@ from src.core.abstract_subscriber import abstract_subscriber
 from src.core.observe_service import observe_service
 from src.core.event_type import event_type
 from src.dtos.block_date_dto import block_date_dto
+from src.logic.logger_service import logger_service
+from src.dtos.logger_dto import logger_dto
 
 class rests(abstract_subscriber):
 
     service: start_service = None
 
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(rests, cls).__new__(cls)
+            observe_service.add(cls.instance)
+        return cls.instance
+
     def __init__(self):
         rests.service = start_service()
         rests.service.start()
-        observe_service.add(self)
+
+        # Инициализация логгера
+        logger_service()
 
     # Функция подсчёта остатков в базовых единицах
     # транзакции отфильтрованы по номенклатуре, складу и позже дате блокировки
@@ -91,4 +101,9 @@ class rests(abstract_subscriber):
             validator.validate(params, block_date_dto)
             new_block_date = params.new_block_date
             validator.validate(new_block_date, datetime)
-            self.update_block_date(new_block_date)  
+            self.update_block_date(new_block_date)
+
+            # Логгирование
+            log_message = f"Пересчитаны остатки номенклатур для новой даты блокировки {new_block_date.strftime("%Y-%m-%d")}"
+            log_dto = logger_dto().create_info("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)

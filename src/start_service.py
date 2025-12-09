@@ -28,6 +28,9 @@ import json
 from src.dtos.reference_dto import reference_dto
 from src.dtos.update_dependencies_dto import update_dependencies_dto
 from src.dtos.check_dependencies_dto import check_dependencies_dto
+from src.dtos.logger_dto import logger_dto
+from src.logic.logger_service import logger_service
+
 
 class start_service(abstract_subscriber):
     __repo:reposity = reposity()
@@ -54,12 +57,12 @@ class start_service(abstract_subscriber):
     def __init__(self):
         self.__repo.initalize()
         self.__settings = settings_manager()
-        observe_service.add(self)
-
+        logger_service()
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
             cls.instance = super(start_service, cls).__new__(cls)
+            observe_service.add(cls.instance)
         return cls.instance
 
      # Текущий файл
@@ -293,18 +296,39 @@ class start_service(abstract_subscriber):
         if event == event_type.add_reference():
             validator.validate(params, reference_dto)
             model_type = params.name
+            # Логгирование
+            log_message = f"Добавление новой модели {model_type}."
+            log_dto = logger_dto().create_info("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)
             if model_type not in self.__match.keys():
+                # Логгирование
+                log_message = f"Получена неизвестная модель {model_type}."
+                log_dto = logger_dto().create_error("storage_service", log_message)
+                observe_service.create_event(event_type.log(), log_dto)
                 raise argument_exception(f"Получена неизвестная модель {model_type}. Доступны только следующие модели: {self.__match.keys()}")
             dto = self.__match[model_type][0]().create(params.model_dto_dict)
             model = self.__match[model_type][1].from_dto(dto, self.__cache)
             if model not in self.data[model_type]:
                 self.__save_item(model_type, dto, model)
+            else:
+                # Логгирование
+                log_message = f"Добавляемая модель уже существует в репозитории."
+                log_dto = logger_dto().create_debug("storage_service", log_message)
+                observe_service.create_event(event_type.log(), log_dto)
         elif event == event_type.change_reference():
             validator.validate(params, reference_dto)
             model_type = params.name
             # Получить объект по коду
             old_model = self.repo.get_by_unique_code(params.id)
+            # Логгирование
+            log_message = f"Изменение модели {model_type} {old_model}."
+            log_dto = logger_dto().create_info("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)
             if not old_model:
+                # Логгирование
+                log_message = f"Объект {old_model} не найден."
+                log_dto = logger_dto().create_error("storage_service", log_message)
+                observe_service.create_event(event_type.log(), log_dto)
                 raise operation_exception(f"Объект с кодом {params.id} не найден.")
             self.data[reposity.rest_key()]=list(self.data[reposity.rest_key()].values())
             # Получить dto объекта, обновить его и перезаписать объект
@@ -312,6 +336,10 @@ class start_service(abstract_subscriber):
             dto_dict.update(params.model_dto_dict)
             dto = self.__match[model_type][0]().create(dto_dict)
             model=self.__match[model_type][1].from_dto(dto, self.__cache)
+            # Логгирование
+            log_message = f"Изменение зависимых моделей."
+            log_dto = logger_dto().create_debug("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)
             update_dto = update_dependencies_dto().create({"old_model":old_model, "new_model":model})
             # Рассылка всем моделям проверить зависимость от old_model, и обновится, если зависимость обнаружена.
             observe_service.create_event( event_type.update_dependencies(), update_dto)
@@ -323,11 +351,27 @@ class start_service(abstract_subscriber):
             model_type = params.name
             # Получить объект по коду
             model = self.repo.get_by_unique_code(params.id)
+            # Логгирование
+            log_message = f"Удаление модели {model_type} {model}."
+            log_dto = logger_dto().create_info("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)
             if not model:
+                # Логгирование
+                log_message = f"Объект {old_model} не найден."
+                log_dto = logger_dto().create_error("storage_service", log_message)
+                observe_service.create_event(event_type.log(), log_dto)
                 raise operation_exception(f"Объект с кодом {params.id} не найден.")
             check_dto = check_dependencies_dto().create({"model":model})
+            # Логгирование
+            log_message = f"Проверка зависимых моделей."
+            log_dto = logger_dto().create_debug("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)
             # Рассылка всем моделям проверить зависимость от model, и вызвать исключение, если зависимость обнаружна.
             observe_service.create_event(event_type.check_dependencies(), check_dto)
             self.__pop_item(model_type, model)
         elif event == event_type.change_block_period():
+            # Логгирование
+            log_message = f"Сохранение репозитория в файл appsettings.json."
+            log_dto = logger_dto().create_info("storage_service", log_message)
+            observe_service.create_event(event_type.log(), log_dto)
             self.save_reposity("appsettings.json")

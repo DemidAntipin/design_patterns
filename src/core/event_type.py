@@ -48,25 +48,11 @@ class event_type:
         return "check_dependencies"
 
     """
-    Событие - логгирование уровня INFO
+    Событие - логгирование
     """
     @staticmethod
-    def info() -> str:
-        return "info"
-    
-    """
-    Событие - логгирование уровня WARNING
-    """
-    @staticmethod
-    def warning() -> str:
-        return "warning"
-
-    """
-    Событие - логгирование уровня ERROR
-    """
-    @staticmethod
-    def error() -> str:
-        return "error"
+    def log() -> str:
+        return "log"
 
     """
     Получить список всех событий

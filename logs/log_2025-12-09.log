@@ -1,0 +1,33 @@
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:22:56 | INFO | storage_service | Сохранение репозитория в файл appsettings.json.
+01:22:56 | INFO | settings_manager | Изменена дата блокировки c 1900-01-01 на 2025-05-12
+01:22:56 | INFO | storage_service | Пересчитаны остатки номенклатур для новой даты блокировки 2025-05-12
+01:23:06 | DEBUG | API | GET /api/block_date/rests/2025-01-01 - запрос остатков на дату блокировки 2025-01-01
+01:23:26 | DEBUG | API | GET /api/status - проверка доступности API
+01:23:27 | DEBUG | API | GET /api/status - проверка доступности API
+01:23:45 | INFO | API | POST /api/save - запрос на сохранение репозитория в файл apppset.json
+01:23:45 | DEBUG | API | Сохранение успешно завершено в файл apppset.json
+01:25:15 | INFO | API | DELETE /api/reference - запрос на удаление объекта из репозитория
+01:25:15 | INFO | storage_service | Удаление модели transaction_model 7f4ecdab-0f01-4216-8b72-4c91d2226944.
+01:25:15 | DEBUG | storage_service | Проверка зависимых моделей.
+01:25:16 | INFO | CRUD | Удален объект transaction_model c id 7f4ecdab-0f01-4216-8b72-4c91d2226944.

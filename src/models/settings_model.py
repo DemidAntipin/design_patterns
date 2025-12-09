@@ -1,6 +1,8 @@
 from src.models import company_model
 from src.core.validator import validator
 from datetime import datetime
+from src.core.log_level import log_level
+from src.core.log_mode import log_mode
 
 ######################################
 # Модель настроек приложения
@@ -10,6 +12,12 @@ class settings_model():
     __datetime_format: str = "%Y-%m-%d"
     __start_date: datetime = datetime(1900, 1, 1)
     __block_date: datetime = None
+
+    # Настройки логирования
+    __logging_level: log_level = None
+    __logging_mode: log_mode = None
+    __logging_dir: str = None
+    __logging_format: str = None
 
     # Текущая организация
     @property
@@ -46,3 +54,41 @@ class settings_model():
     def block_date(self, value: datetime):
         validator.validate(value, datetime)
         self.__block_date = value
+
+    @property
+    def logging_level(self) -> log_level:
+        return self.__logging_level
+    
+    @logging_level.setter
+    def logging_level(self, value: str):
+        validator.validate(value, str)
+        if value in log_level.levels():
+            self.__logging_level = log_level[value]
+
+    @property
+    def logging_mode(self) -> log_mode:
+        return self.__logging_mode
+    
+    @logging_mode.setter
+    def logging_mode(self, value: str):
+        validator.validate(value, str)
+        if value in log_mode.mods():
+            self.__logging_mode = log_mode[value]
+
+    @property
+    def logging_dir(self) -> str:
+        return self.__logging_dir
+    
+    @logging_dir.setter
+    def logging_dir(self, value: str):
+        validator.validate(value, str)
+        self.__logging_dir = value
+
+    @property
+    def logging_format(self) -> str:
+        return self.__logging_format
+    
+    @logging_format.setter
+    def logging_format(self, value: str):
+        validator.validate(value, str)
+        self.__logging_format = value
